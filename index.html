@@ -36,6 +36,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            touch-action: none;  /* 防止默认手势干扰，由canvas内部处理 */
         }
 
         #main-container {
@@ -50,6 +51,7 @@
             flex: 1;
             position: relative;
             cursor: crosshair;
+            touch-action: none;  /* 禁止浏览器默认滚动/缩放 */
         }
 
         #btn-menu {
@@ -71,6 +73,7 @@
             transition: none;
             box-shadow: 0 0 12px var(--ui-glow);
             backdrop-filter: blur(4px);
+            touch-action: manipulation;  /* 优化移动端点击 */
         }
         #btn-menu:hover {
             background: rgba(5, 5, 5, 0.85);
@@ -101,6 +104,8 @@
             transform: translateX(100%);
             transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
             backdrop-filter: blur(6px);
+            touch-action: pan-y;  /* 允许垂直滚动，但阻止水平手势 */
+            -webkit-overflow-scrolling: touch;
         }
 
         #sidebar.active { transform: translateX(0); }
@@ -259,6 +264,7 @@
             text-align: center; 
             letter-spacing: 1.2px;
             text-transform: uppercase;
+            touch-action: manipulation;
         }
         .action-btn:hover { background: rgba(255, 85, 0, 0.15); color: var(--main); }
         .action-btn:active { transform: scale(0.98); }
@@ -560,7 +566,6 @@
             gravityEnabled: false,
             gravityColor: '#ffaa00',
             gravityBrightness: 1.0,
-            // 陨石配置
             meteorEnabled: true,
             meteorColor: '#ccaa88',
             meteorSpeed: 0.8,
@@ -570,7 +575,7 @@
             showLockLine: true,
         };
 
-        const LOCAL_STORAGE_KEY = 'terrain_console_config_v10';
+        const LOCAL_STORAGE_KEY = 'terrain_console_config_v11';
 
         function loadConfig() {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -601,7 +606,7 @@
         let isTouchActive = false;
         let meteorSpawnAcc = 0;
 
-        // 工具：创建无辐条圆环 (LineLoop)
+        // 工具：创建无辐条圆环
         function createRingLine(radius, color, segments = 32) {
             const points = [];
             for (let i = 0; i <= segments; i++) {
@@ -612,65 +617,48 @@
             return new THREE.LineLoop(geom, new THREE.LineBasicMaterial({ color: color }));
         }
 
-        // 陨石模型：球体 + 三个无辐条圆环
         function createMeteorMesh(color, size) {
             const group = new THREE.Group();
-            const sphereMat = new THREE.MeshStandardMaterial({ 
-                color: color, 
-                emissive: color, 
-                emissiveIntensity: 0.5,
-                roughness: 0.3
-            });
+            const sphereMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.5 });
             const sphere = new THREE.Mesh(new THREE.SphereGeometry(size * 0.4, 8, 6), sphereMat);
             group.add(sphere);
-            
             const ringMat = new THREE.LineBasicMaterial({ color: color });
             const ring1 = createRingLine(size * 0.65, color);
             const ring2 = createRingLine(size * 0.65, color);
             const ring3 = createRingLine(size * 0.65, color);
-            ring1.rotation.x = Math.PI / 2;
-            ring2.rotation.y = Math.PI / 2;
-            ring3.rotation.z = Math.PI / 2;
+            ring1.rotation.x = ring2.rotation.y = ring3.rotation.z = Math.PI / 2;
             group.add(ring1, ring2, ring3);
-            
             return group;
         }
 
-        // 生成新陨石
         function spawnMeteor() {
             if (!config.meteorEnabled) return;
             const color = config.meteorColor;
             const size = config.meteorSize * (0.8 + Math.random() * 0.6);
             const mesh = createMeteorMesh(color, size);
-            
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
             const r = config.sphereRadius + config.amplitude + 5.0 + Math.random() * 4;
-            const pos = new THREE.Vector3(
+            mesh.position.set(
                 r * Math.sin(phi) * Math.cos(theta),
                 r * Math.sin(phi) * Math.sin(theta),
                 r * Math.cos(phi)
             );
-            mesh.position.copy(pos);
-            mesh.userData.velocity = pos.clone().normalize().negate().multiplyScalar(config.meteorSpeed * (0.7 + Math.random() * 0.6));
+            mesh.userData.velocity = mesh.position.clone().normalize().negate().multiplyScalar(config.meteorSpeed * (0.7 + Math.random() * 0.6));
             mesh.userData.size = size;
             mesh.userData.lockTimer = 0;
-            mesh.userData.lockedBy = null;
             scene.add(mesh);
             meteors.push(mesh);
         }
 
-        // 撞击闪光：单个无辐条圆环，半径为陨石1.5倍
         function addImpactFlash(position, color, size) {
             const ring = createRingLine(size * 1.5, new THREE.Color(color).multiplyScalar(1.5));
             ring.position.copy(position);
-            const normal = position.clone().normalize();
-            ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+            ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), position.clone().normalize());
             scene.add(ring);
             impactFlashes.push({ mesh: ring, life: 0.6, maxLife: 0.6 });
         }
 
-        // 锁定爆炸：三个虚线圆环向外扩散
         function addLockExplosion(position, color, size) {
             const dashMaterial = new THREE.LineDashedMaterial({ color: color, dashSize: 0.05, gapSize: 0.04 });
             const rings = [
@@ -678,31 +666,18 @@
                 new THREE.LineLoop(new THREE.BufferGeometry(), dashMaterial),
                 new THREE.LineLoop(new THREE.BufferGeometry(), dashMaterial)
             ];
-            rings[0].rotation.x = Math.PI / 2;
-            rings[1].rotation.y = Math.PI / 2;
-            rings[2].rotation.z = Math.PI / 2;
-            
+            rings[0].rotation.x = rings[1].rotation.y = rings[2].rotation.z = Math.PI / 2;
             const group = new THREE.Group();
             rings.forEach(r => group.add(r));
             group.position.copy(position);
             scene.add(group);
-            
-            lockExplosions.push({
-                group, rings, size,
-                progress: 0,
-                duration: 0.8,
-                color: color
-            });
+            lockExplosions.push({ group, rings, size, progress: 0, duration: 0.8, color });
         }
 
-        // 滑块控件
         function createSliderControl(containerId, value, min, max, step, onChange) {
             const container = document.getElementById(containerId);
-            container.innerHTML = `
-                <input type="range" min="${min}" max="${max}" step="${step}" value="${value}">
-                <span class="slider-value">${value.toFixed(step < 1 ? 2 : 0)}</span>
-            `;
-            const range = container.querySelector('input[type=range]');
+            container.innerHTML = `<input type="range" min="${min}" max="${max}" step="${step}" value="${value}"><span class="slider-value">${value.toFixed(step < 1 ? 2 : 0)}</span>`;
+            const range = container.querySelector('input');
             const span = container.querySelector('.slider-value');
             range.addEventListener('input', () => {
                 const val = parseFloat(range.value);
@@ -712,19 +687,11 @@
             return { range, span };
         }
 
-        // 滑块开关 (无文字描述)
         function createSwitch(containerId, initialState, onChange) {
             const container = document.getElementById(containerId);
-            container.innerHTML = `
-                <label class="switch">
-                    <input type="checkbox" ${initialState ? 'checked' : ''}>
-                    <span class="slider-switch"></span>
-                </label>
-            `;
+            container.innerHTML = `<label class="switch"><input type="checkbox" ${initialState ? 'checked' : ''}><span class="slider-switch"></span></label>`;
             const checkbox = container.querySelector('input');
-            checkbox.addEventListener('change', () => {
-                onChange(checkbox.checked);
-            });
+            checkbox.addEventListener('change', () => onChange(checkbox.checked));
             return { checkbox, setState: (val) => { checkbox.checked = val; } };
         }
 
@@ -743,20 +710,13 @@
         function updateGravityLines() {
             const enabled = config.gravityEnabled;
             const color = new THREE.Color(config.gravityColor).multiplyScalar(config.gravityBrightness);
-            gravityLines.forEach(line => {
-                line.visible = enabled;
-                if (enabled) line.material.color.set(color);
-            });
+            gravityLines.forEach(line => { line.visible = enabled; if (enabled) line.material.color.set(color); });
         }
 
-        // 更新所有飞船颜色 (包括材质、发光、灯光、轨道环、航迹线)
         function updateShipColor(colorHex) {
             const color = new THREE.Color(colorHex);
             ships.forEach(s => {
-                if (s.mesh.material) {
-                    s.mesh.material.color.set(color);
-                    s.mesh.material.emissive.set(color);
-                }
+                if (s.mesh.material) { s.mesh.material.color.set(color); s.mesh.material.emissive.set(color); }
                 if (s.light) s.light.color.set(color);
                 if (s.orbitLine) s.orbitLine.material.color.set(color);
                 if (s.trailLine) s.trailLine.material.color.set(color);
@@ -778,12 +738,13 @@
             syncMainColor(config.baseColor);
 
             const sidebar = document.getElementById('sidebar');
-            document.getElementById('btn-menu').addEventListener('click', (e) => {
+            const menuBtn = document.getElementById('btn-menu');
+            menuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 sidebar.classList.toggle('active');
             });
 
-            // 滑块绑定
+            // 滑块
             createSliderControl('ctrl-rad', config.sphereRadius, 1.0, 5.0, 0.1, v => { config.sphereRadius = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
             createSliderControl('ctrl-noise', config.noiseScale, 0.1, 5.0, 0.1, v => { config.noiseScale = v; generateTerrain(); saveConfig(); });
             createSliderControl('ctrl-amp', config.amplitude, 0.1, 2.0, 0.05, v => { config.amplitude = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
@@ -796,13 +757,11 @@
             createSliderControl('ctrl-hover', config.hoverHeight, 0.1, 2.0, 0.05, v => { config.hoverHeight = v; randomizeOrbits(); saveConfig(); });
             createSliderControl('ctrl-ssize', config.shipSize, 0.2, 3.0, 0.1, v => { config.shipSize = v; ships.forEach(s => s.container.scale.set(v,v,v)); saveConfig(); });
             createSliderControl('ctrl-gravity-bright', config.gravityBrightness, 0.2, 2.5, 0.1, v => { config.gravityBrightness = v; updateGravityLines(); saveConfig(); });
-            
             createSliderControl('ctrl-meteor-speed', config.meteorSpeed, 0.2, 2.5, 0.1, v => { config.meteorSpeed = v; saveConfig(); });
             createSliderControl('ctrl-meteor-density', config.meteorDensity, 0.2, 3.0, 0.1, v => { config.meteorDensity = v; saveConfig(); });
             createSliderControl('ctrl-meteor-size', config.meteorSize, 0.3, 2.0, 0.1, v => { config.meteorSize = v; saveConfig(); });
             createSliderControl('ctrl-lock-dist', config.lockDistance, 1.0, 5.0, 0.1, v => { config.lockDistance = v; saveConfig(); });
 
-            // 开关
             createSwitch('switch-auto-rotate', config.autoRotate, v => { config.autoRotate = v; saveConfig(); });
             createSwitch('switch-trail', config.showTrail, v => { config.showTrail = v; saveConfig(); });
             createSwitch('switch-orbitring', config.showOrbitRing, v => { config.showOrbitRing = v; saveConfig(); });
@@ -811,7 +770,6 @@
             createSwitch('switch-lock-line', config.showLockLine, v => { config.showLockLine = v; saveConfig(); });
 
             document.getElementById('btn-rand-orbits').addEventListener('click', () => { randomizeOrbits(); saveConfig(); });
-            
             document.getElementById('ui-mode').addEventListener('change', e => { config.mode = parseInt(e.target.value); updateMaterialUniforms(); saveConfig(); });
             document.getElementById('ui-color').addEventListener('input', e => { config.baseColor = e.target.value; updateMaterialUniforms(); saveConfig(); });
             ['heat-low','heat-mid','heat-high'].forEach((id, idx) => {
@@ -822,16 +780,8 @@
                     updateMaterialUniforms(); saveConfig();
                 });
             });
-            document.getElementById('ui-pcolor').addEventListener('input', e => {
-                config.shipColor = e.target.value;
-                updateShipColor(config.shipColor);
-                saveConfig();
-            });
-            document.getElementById('ui-sstyle').addEventListener('change', e => {
-                config.shipStyle = parseInt(e.target.value);
-                ships.forEach(s => { s.mesh.material.wireframe = (config.shipStyle === 0); });
-                saveConfig();
-            });
+            document.getElementById('ui-pcolor').addEventListener('input', e => { config.shipColor = e.target.value; updateShipColor(config.shipColor); saveConfig(); });
+            document.getElementById('ui-sstyle').addEventListener('change', e => { config.shipStyle = parseInt(e.target.value); ships.forEach(s => s.mesh.material.wireframe = (config.shipStyle === 0)); saveConfig(); });
             document.getElementById('ui-gravity-color').addEventListener('input', e => { config.gravityColor = e.target.value; updateGravityLines(); saveConfig(); });
             document.getElementById('meteor-color').addEventListener('input', e => { config.meteorColor = e.target.value; saveConfig(); });
         }
@@ -869,7 +819,7 @@
                     float fogFactor = smoothstep(6.0, 13.0, gl_FragCoord.z / gl_FragCoord.w);
                     gl_FragColor = vec4(mix(finalColor, vec3(0.0), fogFactor), 1.0);
                 }`,
-                wireframe: true, transparent: false, depthWrite: true, depthTest: true
+                wireframe: true
             });
 
             terrainMesh = new THREE.Mesh(new THREE.BufferGeometry(), customMaterial);
@@ -924,7 +874,6 @@
             }
             randomizeOrbits(); 
             updateGravityLines();
-            // 确保颜色同步
             updateShipColor(config.shipColor);
         }
 
@@ -942,11 +891,53 @@
         }
 
         function setupInteractions(canvas) {
-            const onDown = (e) => { if(e.touches){ isTouchActive=true; e.preventDefault(); } else if(isTouchActive) return; isDragging=true; dragDistance=0; const p=e.touches?e.touches[0]:e; previousMousePosition={x:p.clientX,y:p.clientY}; };
-            const onUp = (e) => { if(e.touches){ isTouchActive=false; e.preventDefault(); } else if(isTouchActive){ isTouchActive=false; return; } if(isDragging && dragDistance<5) document.getElementById('sidebar').classList.toggle('active'); isDragging=false; };
-            const onMove = (e) => { if(!isDragging) return; if(e.touches) e.preventDefault(); const p=e.touches?e.touches[0]:e; const dx=p.clientX-previousMousePosition.x, dy=p.clientY-previousMousePosition.y; dragDistance+=Math.abs(dx)+Math.abs(dy); const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(dy*0.005,dx*0.005,0,'YXZ')); terrainMesh.quaternion.multiplyQuaternions(q,terrainMesh.quaternion); ships.forEach(s=>s.orbitGroup.quaternion.multiplyQuaternions(q,s.orbitGroup.quaternion)); previousMousePosition={x:p.clientX,y:p.clientY}; };
-            canvas.addEventListener('mousedown',onDown); window.addEventListener('mouseup',onUp); window.addEventListener('mousemove',onMove);
-            canvas.addEventListener('touchstart',onDown,{passive:false}); window.addEventListener('touchend',onUp); window.addEventListener('touchmove',onMove,{passive:false});
+            const onDown = (e) => {
+                if (e.touches) {
+                    isTouchActive = true;
+                    e.preventDefault();
+                } else if (isTouchActive) return;
+                isDragging = true;
+                dragDistance = 0;
+                const p = e.touches ? e.touches[0] : e;
+                previousMousePosition = { x: p.clientX, y: p.clientY };
+            };
+            const onUp = (e) => {
+                if (e.touches) {
+                    isTouchActive = false;
+                    e.preventDefault();
+                } else if (isTouchActive) {
+                    isTouchActive = false;
+                    return;
+                }
+                if (isDragging && dragDistance < 5) {
+                    // 轻触画布空白区域也可切换侧边栏（保留原有交互）
+                    document.getElementById('sidebar').classList.toggle('active');
+                }
+                isDragging = false;
+            };
+            const onMove = (e) => {
+                if (!isDragging) return;
+                if (e.touches) e.preventDefault();
+                const p = e.touches ? e.touches[0] : e;
+                const dx = p.clientX - previousMousePosition.x;
+                const dy = p.clientY - previousMousePosition.y;
+                dragDistance += Math.abs(dx) + Math.abs(dy);
+                const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(dy*0.005, dx*0.005, 0, 'YXZ'));
+                terrainMesh.quaternion.multiplyQuaternions(q, terrainMesh.quaternion);
+                ships.forEach(s => s.orbitGroup.quaternion.multiplyQuaternions(q, s.orbitGroup.quaternion));
+                previousMousePosition = { x: p.clientX, y: p.clientY };
+            };
+            canvas.addEventListener('mousedown', onDown);
+            window.addEventListener('mouseup', onUp);
+            window.addEventListener('mousemove', onMove);
+            canvas.addEventListener('touchstart', onDown, { passive: false });
+            window.addEventListener('touchend', onUp);
+            window.addEventListener('touchmove', onMove, { passive: false });
+            
+            // 阻止侧边栏触摸事件冒泡，确保滑块等控件正常操作
+            const sidebar = document.getElementById('sidebar');
+            sidebar.addEventListener('touchstart', (e) => e.stopPropagation());
+            sidebar.addEventListener('touchmove', (e) => e.stopPropagation());
         }
 
         function onWindowResize() {
@@ -967,114 +958,70 @@
                 ships.forEach(s=>s.orbitGroup.rotateOnAxis(autoRotAxis, 0.005*config.planetSpeed));
             }
 
-            // 陨石生成
             if (config.meteorEnabled) {
                 meteorSpawnAcc += delta * config.meteorDensity;
-                while (meteorSpawnAcc > 1.0) {
-                    spawnMeteor();
-                    meteorSpawnAcc -= 1.0;
-                }
+                while (meteorSpawnAcc > 1.0) { spawnMeteor(); meteorSpawnAcc -= 1.0; }
             }
 
             const meteorsToRemove = new Set();
-            // 飞船锁定逻辑
             ships.forEach(ship => {
                 const shipPos = new THREE.Vector3(); ship.container.getWorldPosition(shipPos);
-                let closestMeteor = null;
-                let minDist = Infinity;
+                let closestMeteor = null, minDist = Infinity;
                 meteors.forEach(m => {
                     if (meteorsToRemove.has(m)) return;
                     const dist = shipPos.distanceTo(m.position);
-                    if (dist < config.lockDistance && dist < minDist) {
-                        minDist = dist;
-                        closestMeteor = m;
-                    }
+                    if (dist < config.lockDistance && dist < minDist) { minDist = dist; closestMeteor = m; }
                 });
-                
                 if (closestMeteor) {
-                    if (ship.lockTarget === closestMeteor) {
-                        closestMeteor.userData.lockTimer += delta;
-                    } else {
-                        ship.lockTarget = closestMeteor;
-                        closestMeteor.userData.lockTimer = 0;
-                        closestMeteor.userData.lockedBy = ship;
-                    }
+                    if (ship.lockTarget === closestMeteor) closestMeteor.userData.lockTimer += delta;
+                    else { ship.lockTarget = closestMeteor; closestMeteor.userData.lockTimer = 0; }
                     if (config.showLockLine) {
                         ship.lockLine.visible = true;
                         ship.lockLine.material.color.set(config.shipColor);
                         ship.lockLine.geometry.setFromPoints([shipPos, closestMeteor.position.clone()]);
                         ship.lockLine.computeLineDistances();
                     } else ship.lockLine.visible = false;
-                    
                     if (closestMeteor.userData.lockTimer >= 1.0) {
-                        // 锁定爆炸
                         addLockExplosion(closestMeteor.position.clone(), config.shipColor, closestMeteor.userData.size);
                         meteorsToRemove.add(closestMeteor);
-                        ship.lockTarget = null;
-                        ship.lockLine.visible = false;
+                        ship.lockTarget = null; ship.lockLine.visible = false;
                     }
-                } else {
-                    ship.lockTarget = null;
-                    ship.lockLine.visible = false;
-                }
+                } else { ship.lockTarget = null; ship.lockLine.visible = false; }
             });
 
-            // 陨石移动 & 撞击
             meteors.forEach(m => {
                 if (meteorsToRemove.has(m)) return;
                 m.position.addScaledVector(m.userData.velocity, delta);
-                const dirToCenter = m.position.clone().normalize().negate();
-                raycaster.set(m.position, dirToCenter);
+                raycaster.set(m.position, m.position.clone().normalize().negate());
                 const hits = raycaster.intersectObject(terrainMesh);
                 if (hits.length && hits[0].distance < 0.8) {
-                    const hit = hits[0];
-                    addImpactFlash(hit.point, config.meteorColor, m.userData.size);
+                    addImpactFlash(hits[0].point, config.meteorColor, m.userData.size);
                     meteorsToRemove.add(m);
-                    return;
-                }
-                if (m.position.length() > 20) meteorsToRemove.add(m);
+                } else if (m.position.length() > 20) meteorsToRemove.add(m);
             });
 
-            // 移除陨石并解除锁定
             meteorsToRemove.forEach(m => {
                 scene.remove(m);
-                const idx = meteors.indexOf(m);
-                if (idx !== -1) meteors.splice(idx, 1);
+                meteors.splice(meteors.indexOf(m), 1);
                 ships.forEach(s => { if (s.lockTarget === m) { s.lockTarget = null; s.lockLine.visible = false; } });
             });
 
-            // 更新闪光 (撞击)
             for (let i=impactFlashes.length-1; i>=0; i--) {
                 const f = impactFlashes[i];
                 f.life -= delta;
-                if (f.life <= 0) {
-                    scene.remove(f.mesh);
-                    impactFlashes.splice(i,1);
-                } else {
-                    const scale = 1 + (1 - f.life/f.maxLife) * 0.8;
-                    f.mesh.scale.setScalar(scale);
-                    f.mesh.material.opacity = f.life / f.maxLife;
-                }
+                if (f.life <= 0) { scene.remove(f.mesh); impactFlashes.splice(i,1); }
+                else { f.mesh.scale.setScalar(1 + (1 - f.life/f.maxLife)*0.8); f.mesh.material.opacity = f.life/f.maxLife; }
             }
 
-            // 更新锁定爆炸 (虚线扩散)
             for (let i=lockExplosions.length-1; i>=0; i--) {
                 const exp = lockExplosions[i];
                 exp.progress += delta / exp.duration;
-                if (exp.progress >= 1.0) {
-                    scene.remove(exp.group);
-                    lockExplosions.splice(i,1);
-                    continue;
-                }
+                if (exp.progress >= 1.0) { scene.remove(exp.group); lockExplosions.splice(i,1); continue; }
                 const r = exp.size * 0.5 + exp.size * 1.5 * exp.progress;
                 const opacity = 1.0 - exp.progress;
                 exp.rings.forEach(ring => {
-                    const points = [];
-                    for (let j=0; j<=32; j++) {
-                        const theta = (j/32)*Math.PI*2;
-                        points.push(new THREE.Vector3(Math.cos(theta)*r, Math.sin(theta)*r, 0));
-                    }
-                    ring.geometry.setFromPoints(points);
+                    const pts = []; for(let j=0;j<=32;j++){ const a=(j/32)*Math.PI*2; pts.push(new THREE.Vector3(Math.cos(a)*r, Math.sin(a)*r, 0)); }
+                    ring.geometry.setFromPoints(pts);
                     ring.material.color.set(exp.color);
                     ring.material.opacity = opacity;
                     ring.material.transparent = true;
@@ -1082,20 +1029,31 @@
                 });
             }
 
-            // 飞船更新
             ships.forEach(s=>{
-                const old=new THREE.Vector3(); s.container.getWorldPosition(old);
+                const old = new THREE.Vector3(); s.container.getWorldPosition(old);
                 s.pivot.rotateY(s.baseSpeed*config.shipSpeed*0.02);
-                const neo=new THREE.Vector3(); s.container.getWorldPosition(neo);
-                const up=neo.clone().normalize(); s.container.up.copy(up); s.container.lookAt(neo.clone().add(neo.clone().sub(old).normalize()));
-                raycaster.set(neo, up.clone().negate()); const hits=raycaster.intersectObject(terrainMesh);
+                const neo = new THREE.Vector3(); s.container.getWorldPosition(neo);
+                s.container.up.copy(neo.clone().normalize());
+                s.container.lookAt(neo.clone().add(neo.clone().sub(old).normalize()));
+                raycaster.set(neo, neo.clone().normalize().negate());
+                const hits = raycaster.intersectObject(terrainMesh);
                 if(hits.length){
-                    const h=hits[0], n=h.face.normal.clone(); s.shadow.visible=true; s.shadow.position.copy(h.point).add(n.multiplyScalar(0.02));
-                    s.shadow.lookAt(h.point.clone().add(n)); s.shadow.material.opacity=Math.max(0,0.7-h.distance*0.4);
-                    if(config.gravityEnabled){ s.gravityLine.geometry.setFromPoints([neo.clone(), s.shadow.position.clone()]); s.gravityLine.computeLineDistances(); }
-                } else { s.shadow.visible=false; if(config.gravityEnabled) s.gravityLine.geometry.setFromPoints([]); }
-                s.orbitLine.visible=config.showOrbitRing;
-                if(config.showTrail){ s.trailLine.visible=true; if(Math.abs(s.baseSpeed*config.shipSpeed*0.02)>0.001||isDragging){ s.history.push(neo.clone()); if(s.history.length>40)s.history.shift(); s.trailLine.geometry.setFromPoints(s.history); } } else s.trailLine.visible=false;
+                    const h = hits[0], n = h.face.normal.clone();
+                    s.shadow.visible = true;
+                    s.shadow.position.copy(h.point).add(n.multiplyScalar(0.02));
+                    s.shadow.lookAt(h.point.clone().add(n));
+                    s.shadow.material.opacity = Math.max(0, 0.7 - h.distance*0.4);
+                    if(config.gravityEnabled){ s.gravityLine.geometry.setFromPoints([neo, s.shadow.position.clone()]); s.gravityLine.computeLineDistances(); }
+                } else { s.shadow.visible = false; if(config.gravityEnabled) s.gravityLine.geometry.setFromPoints([]); }
+                s.orbitLine.visible = config.showOrbitRing;
+                if(config.showTrail){
+                    s.trailLine.visible = true;
+                    if(Math.abs(s.baseSpeed*config.shipSpeed*0.02)>0.001||isDragging){
+                        s.history.push(neo.clone());
+                        if(s.history.length>40) s.history.shift();
+                        s.trailLine.geometry.setFromPoints(s.history);
+                    }
+                } else s.trailLine.visible = false;
             });
 
             renderer.render(scene, camera);
