@@ -20,9 +20,9 @@
 
         :root {
             --bg: #050505;
-            --main: #ff5500;      /* 动态同步星球线框颜色 */
-            --accent: #00eeff;
-            --text-dim: #884422;
+            --main: #ff5500;          /* 动态同步星球线框颜色，所有UI主色 */
+            --accent: #00eeff;         /* 辅助强调色（用于数值显示等） */
+            --text-dim: #884422;       /* 已弃用，改为基于main的透明度 */
             --ui-glow: rgba(255, 85, 0, 0.2);
         }
 
@@ -52,7 +52,7 @@
             cursor: crosshair;
         }
 
-        /* 菜单按钮 — 无高亮交互，色调统一 */
+        /* 菜单按钮 — 无高亮，完全统一色调 */
         #btn-menu {
             position: absolute;
             top: 20px;
@@ -73,7 +73,6 @@
             box-shadow: 0 0 12px var(--ui-glow);
             backdrop-filter: blur(4px);
         }
-        /* 移除所有高亮悬停效果 */
         #btn-menu:hover {
             background: rgba(5, 5, 5, 0.85);
             box-shadow: 0 0 12px var(--ui-glow);
@@ -90,15 +89,15 @@
         #sidebar {
             position: absolute;
             top: 0; right: 0;
-            width: 380px;
+            width: 400px;           /* 稍微加宽以适应更好布局 */
             height: 100vh;
             border-left: 1px solid var(--main);
             background: rgba(5, 5, 5, 0.94);
-            padding: 70px 20px 20px 20px;
+            padding: 70px 22px 22px 22px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 20px;
             overflow-y: auto;
             z-index: 15;
             transform: translateX(100%);
@@ -109,45 +108,59 @@
         #sidebar.active { transform: translateX(0); }
 
         .panel {
-            border: 1px solid var(--text-dim);
-            padding: 14px 12px 12px;
+            border: 1px solid var(--main);
+            padding: 16px 14px 14px;
             position: relative;
-            background: rgba(10, 10, 10, 0.5);
+            background: rgba(10, 10, 10, 0.6);
+            box-shadow: 0 0 8px var(--ui-glow);
         }
 
         .panel-title {
             position: absolute;
-            top: -10px; left: 10px;
+            top: -10px; left: 14px;
             background: var(--bg);
             padding: 0 8px;
             font-size: 13px;
             font-weight: bold;
             letter-spacing: 1.5px;
             color: var(--main);
-            text-shadow: 0 0 5px var(--ui-glow);
+            text-shadow: 0 0 6px var(--main);
+            border-left: 2px solid var(--main);
         }
 
         .control-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 12px;
+            margin-top: 14px;
             font-size: 12px;
-            gap: 8px;
+            gap: 12px;
         }
 
-        .control-row.block { flex-direction: column; align-items: stretch; gap: 6px; }
+        .control-row.block { 
+            flex-direction: column; 
+            align-items: stretch; 
+            gap: 10px; 
+        }
 
         .control-label {
             letter-spacing: 0.5px;
             display: flex;
             flex-direction: column;
             line-height: 1.4;
-            min-width: 100px;
+            min-width: 110px;
+            color: var(--main);
+            text-transform: uppercase;
         }
-        .control-label .cn { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+        .control-label .cn { 
+            font-size: 10px; 
+            color: var(--main);
+            opacity: 0.7;
+            margin-top: 2px;
+            text-transform: none;
+        }
 
-        /* 滑块样式 — 统一色调 */
+        /* 滑块容器 */
         .slider-container {
             display: flex;
             align-items: center;
@@ -157,7 +170,7 @@
         input[type="range"] {
             flex: 1;
             height: 4px;
-            background: #1a1a1a;
+            background: #151515;
             border: 1px solid var(--main);
             border-radius: 0;
             -webkit-appearance: none;
@@ -168,22 +181,24 @@
             width: 16px;
             height: 16px;
             background: var(--main);
-            border: 1px solid var(--main);
+            border: 1.5px solid var(--main);
             border-radius: 0;
             cursor: pointer;
-            box-shadow: 0 0 8px var(--main);
+            box-shadow: 0 0 10px var(--main);
         }
         .slider-value {
-            min-width: 48px;
+            min-width: 52px;
             text-align: right;
             color: var(--accent);
             font-weight: bold;
             background: #0a0a0a;
-            padding: 4px 6px;
+            padding: 4px 8px;
             border: 1px solid var(--main);
             font-size: 12px;
+            letter-spacing: 0.5px;
         }
 
+        /* 按钮和选择框完全统一为main色 */
         .toggle-btn {
             background: transparent; 
             border: 1px solid var(--main);
@@ -192,16 +207,17 @@
             cursor: pointer;
             font-family: inherit; 
             font-size: 12px; 
-            min-width: 60px; 
-            height: 28px;
-            letter-spacing: 1px;
+            min-width: 64px; 
+            height: 30px;
+            letter-spacing: 1.2px;
             transition: none;
+            text-transform: uppercase;
         }
         .toggle-btn.active { 
             background: var(--main); 
             color: var(--bg); 
+            border-color: var(--main);
         }
-        /* 移除所有hover高亮 */
         .toggle-btn:hover { background: transparent; color: var(--main); }
         .toggle-btn.active:hover { background: var(--main); color: var(--bg); }
 
@@ -216,9 +232,10 @@
             font-weight: bold;
             transition: none; 
             text-align: center; 
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
         }
-        .action-btn:hover { background: rgba(255, 85, 0, 0.1); color: var(--main); }
+        .action-btn:hover { background: rgba(255, 85, 0, 0.15); color: var(--main); }
         .action-btn:active { transform: scale(0.98); }
 
         select {
@@ -227,33 +244,52 @@
             border: 1px solid var(--main);
             font-family: inherit; 
             font-size: 12px; 
-            padding: 4px 6px;
+            padding: 6px 8px;
             outline: none; 
             cursor: pointer; 
-            width: 150px; 
-            height: 30px;
+            width: 170px; 
+            height: 32px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        select option {
+            background: #0a0a0a;
+            color: var(--main);
         }
 
         .color-picker {
-            width: 48px; 
-            height: 28px; 
+            width: 52px; 
+            height: 32px; 
             border: 1px solid var(--main);
             background: transparent; 
             cursor: pointer; 
             padding: 2px;
         }
+
         .color-group {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
             flex-wrap: wrap;
+            margin-top: 6px;
         }
         .color-group span {
-            font-size: 10px;
-            color: var(--text-dim);
-            width: 24px;
+            font-size: 11px;
+            color: var(--main);
+            opacity: 0.8;
+            min-width: 30px;
+            text-transform: uppercase;
         }
 
+        /* 分割线，视觉清爽 */
+        .divider {
+            height: 1px;
+            background: var(--main);
+            opacity: 0.3;
+            margin: 8px 0 2px;
+        }
+
+        /* 扫描线效果 */
         #scanlines {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
@@ -262,13 +298,15 @@
             pointer-events: none; z-index: 5;
         }
 
+        /* 滚动条颜色同步 */
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--text-dim); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--main); }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: var(--main); border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-        .inline-flex { display: flex; align-items: center; gap: 8px; }
-        .spacer { flex:1; }
+        /* 辅助布局 */
+        .inline-flex { display: flex; align-items: center; gap: 10px; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     </style>
 </head>
 <body>
@@ -282,44 +320,57 @@
     <div id="canvas-container"></div>
     
     <div id="sidebar">
-        <!-- 地形参数面板 -->
+        <!-- ========== 地形参数面板 (逻辑重排) ========= -->
         <div class="panel">
             <div class="panel-title">TERRAIN 地形参数</div>
+            
+            <!-- 基础几何 -->
             <div class="control-row">
-                <div class="control-label">PLANET_RAD<span class="cn">星球半径</span></div>
+                <div class="control-label">RADIUS<span class="cn">星球半径</span></div>
                 <div id="ctrl-rad" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">NOISE_SCL<span class="cn">地貌缩放</span></div>
+                <div class="control-label">RESOLUTION<span class="cn">网格细分</span></div>
+                <div id="ctrl-res" class="slider-container"></div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <!-- 噪声与幅度 -->
+            <div class="control-row">
+                <div class="control-label">NOISE SCALE<span class="cn">地貌缩放</span></div>
                 <div id="ctrl-noise" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">AMPLITUDE<span class="cn">山脉起伏幅度</span></div>
+                <div class="control-label">AMPLITUDE<span class="cn">起伏幅度</span></div>
                 <div id="ctrl-amp" class="slider-container"></div>
             </div>
+            
+            <div class="divider"></div>
+            
+            <!-- 视觉样式 -->
             <div class="control-row">
-                <div class="control-label">GRID_RES<span class="cn">星球网格细分</span></div>
-                <div id="ctrl-res" class="slider-container"></div>
-            </div>
-            <div class="control-row">
-                <div class="control-label">LINE_W<span class="cn">网格线宽(视觉)</span></div>
+                <div class="control-label">LINE WIDTH<span class="cn">网格线宽</span></div>
                 <div id="ctrl-linewidth" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">BRIGHT<span class="cn">地形亮度</span></div>
+                <div class="control-label">BRIGHTNESS<span class="cn">地形亮度</span></div>
                 <div id="ctrl-bright" class="slider-container"></div>
             </div>
+            
             <div class="control-row">
-                <div class="control-label">MODE<span class="cn">地貌渲染模式</span></div>
+                <div class="control-label">RENDER MODE<span class="cn">渲染模式</span></div>
                 <select id="ui-mode">
-                    <option value="0">WIREFRAME 电子网格</option>
-                    <option value="1">HEATMAP 高程热力图</option>
+                    <option value="0">WIREFRAME 网格</option>
+                    <option value="1">HEATMAP 热力</option>
                 </select>
             </div>
+            
             <div class="control-row">
-                <div class="control-label">T_COLOR<span class="cn">网格基础色</span></div>
+                <div class="control-label">BASE COLOR<span class="cn">网格基础色</span></div>
                 <input type="color" id="ui-color" class="color-picker" value="#0088ff">
             </div>
+            
             <div class="control-row block">
                 <div class="control-label">HEAT GRADIENT<span class="cn">热力渐变色 (低/中/高)</span></div>
                 <div class="color-group">
@@ -330,72 +381,88 @@
             </div>
         </div>
 
-        <!-- 运动控制 -->
+        <!-- ========== 运动控制面板 ========= -->
         <div class="panel">
-            <div class="panel-title">SYSTEM 运动控制</div>
+            <div class="panel-title">MOTION 运动控制</div>
             <div class="control-row">
-                <div class="control-label">AUTO_ROT<span class="cn">星球自转</span></div>
+                <div class="control-label">AUTO ROTATE<span class="cn">星球自转</span></div>
                 <button id="ui-auto" class="toggle-btn active">ON</button>
             </div>
             <div class="control-row">
-                <div class="control-label">P_SPEED<span class="cn">星球自转流速</span></div>
+                <div class="control-label">ROT. SPEED<span class="cn">自转速度</span></div>
                 <div id="ctrl-pspeed" class="slider-container"></div>
             </div>
         </div>
 
-        <!-- 舰队系统 -->
+        <!-- ========== 舰队系统面板 (重新组织) ========= -->
         <div class="panel">
-            <div class="panel-title">FLEET 飞船舰队系统</div>
+            <div class="panel-title">FLEET 飞船舰队</div>
+            
+            <!-- 数量与随机 -->
             <div class="control-row">
-                <div class="control-label">FLEET_SIZE<span class="cn">活动飞船数量</span></div>
+                <div class="control-label">SHIP COUNT<span class="cn">飞船数量</span></div>
                 <div id="ctrl-scount" class="slider-container"></div>
             </div>
             <div class="control-row block">
-                <button id="btn-rand-orbits" class="action-btn">RANDOMIZE ORBITS 随机重组轨道</button>
+                <button id="btn-rand-orbits" class="action-btn">⟳ RANDOMIZE ORBITS 随机轨道</button>
             </div>
+            
+            <div class="divider"></div>
+            
+            <!-- 轨道参数 -->
             <div class="control-row">
-                <div class="control-label">SHIP_SPEED<span class="cn">公转飞行速度</span></div>
+                <div class="control-label">ORBIT SPEED<span class="cn">公转速度</span></div>
                 <div id="ctrl-sspeed" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">BASE_ALT<span class="cn">基础逃逸高度</span></div>
+                <div class="control-label">BASE ALTITUDE<span class="cn">基准高度</span></div>
                 <div id="ctrl-hover" class="slider-container"></div>
             </div>
-            <!-- 航迹/轨道环独立开关 -->
+            
+            <div class="divider"></div>
+            
+            <!-- 视觉开关 -->
             <div class="control-row">
                 <div class="control-label">TRAIL<span class="cn">航迹显示</span></div>
                 <button id="ui-trail-toggle" class="toggle-btn active">ON</button>
             </div>
             <div class="control-row">
-                <div class="control-label">ORBIT RING<span class="cn">轨道环显示</span></div>
+                <div class="control-label">ORBIT RING<span class="cn">轨道环</span></div>
                 <button id="ui-orbitring-toggle" class="toggle-btn active">ON</button>
             </div>
+            
+            <div class="divider"></div>
+            
+            <!-- 飞船外观 -->
             <div class="control-row">
-                <div class="control-label">SHIP_SCALE<span class="cn">飞船几何尺寸</span></div>
+                <div class="control-label">SHIP SIZE<span class="cn">尺寸</span></div>
                 <div id="ctrl-ssize" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">S_COLOR<span class="cn">外壳/引擎发光色</span></div>
+                <div class="control-label">SHIP COLOR<span class="cn">外壳/光效</span></div>
                 <input type="color" id="ui-pcolor" class="color-picker" value="#ff2200">
             </div>
             <div class="control-row">
-                <div class="control-label">STYLE<span class="cn">材质风格</span></div>
+                <div class="control-label">STYLE<span class="cn">材质</span></div>
                 <select id="ui-sstyle">
                     <option value="0">WIREFRAME 线框</option>
                     <option value="1">SOLID 实体</option>
                 </select>
             </div>
-            <!-- 新增：引力连线 -->
+            
+            <div class="divider"></div>
+            
+            <!-- 引力连线系统 -->
             <div class="control-row">
                 <div class="control-label">GRAVITY LINK<span class="cn">引力虚线 (飞船↔投影)</span></div>
                 <button id="ui-gravity-toggle" class="toggle-btn">OFF</button>
             </div>
             <div class="control-row">
-                <div class="control-label">G_COLOR<span class="cn">连线颜色</span></div>
+                <div class="control-label">LINK COLOR<span class="cn">连线颜色</span></div>
                 <input type="color" id="ui-gravity-color" class="color-picker" value="#ffaa00">
             </div>
             <div class="control-row">
-                <div class="control-label">G_BRIGHT<span class="cn">连线亮度</span></div>
+                <div class="control-label">LINK BRIGHT<span class="cn">连线亮度</span></div>
                 <div id="ctrl-gravity-bright" class="slider-container"></div>
             </div>
         </div>
@@ -458,18 +525,17 @@
             shipCount: 3,
             shipSpeed: 1.0,
             hoverHeight: 0.3,
-            showTrail: true,       // 独立航迹开关
-            showOrbitRing: true,    // 独立轨道环开关
+            showTrail: true,
+            showOrbitRing: true,
             shipSize: 1.0,
             shipColor: '#ff2200',
             shipStyle: 0,
-            // 引力连线
             gravityEnabled: false,
             gravityColor: '#ffaa00',
             gravityBrightness: 1.0
         };
 
-        const LOCAL_STORAGE_KEY = 'terrain_console_config_v6';
+        const LOCAL_STORAGE_KEY = 'terrain_console_config_v7';
 
         function loadConfig() {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -477,24 +543,28 @@
         }
         function saveConfig() { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config)); }
 
-        // 同步CSS主色调
+        // 同步CSS主色调 (所有UI跟随星球线框颜色)
         function syncMainColor(color) {
             document.documentElement.style.setProperty('--main', color);
             document.documentElement.style.setProperty('--ui-glow', color + '40');
+            // 同时调整accent为稍亮的版本 (保持可见)
+            const c = new THREE.Color(color);
+            c.multiplyScalar(1.5);
+            document.documentElement.style.setProperty('--accent', '#' + c.getHexString());
         }
 
         let scene, camera, renderer, raycaster;
         let terrainMesh, customMaterial;
         let ships = []; 
-        let gravityLines = []; // 存储每个飞船的连线对象
+        let gravityLines = [];
         let isDragging = false;
         let dragDistance = 0; 
         let previousMousePosition = { x: 0, y: 0 };
         let autoRotAxis = new THREE.Vector3(1, 1, 0).normalize();
         let timeGlobal = 0;
-        let isTouchActive = false; // 防止触摸/鼠标重复触发
+        let isTouchActive = false;
 
-        // --- 创建滑块控件 (替换数字控件) ---
+        // 滑块控件
         function createSliderControl(containerId, value, min, max, step, onChange) {
             const container = document.getElementById(containerId);
             container.innerHTML = `
@@ -523,15 +593,12 @@
             syncMainColor(config.baseColor);
         }
 
-        // 更新引力连线可见性与样式
         function updateGravityLines() {
             const enabled = config.gravityEnabled;
             const color = new THREE.Color(config.gravityColor).multiplyScalar(config.gravityBrightness);
             gravityLines.forEach(line => {
                 line.visible = enabled;
-                if (enabled) {
-                    line.material.color.set(color);
-                }
+                if (enabled) line.material.color.set(color);
             });
         }
 
@@ -548,9 +615,9 @@
             syncMainColor(config.baseColor);
 
             const updateAutoBtn = () => {
-                const btnAuto = document.getElementById('ui-auto');
-                btnAuto.className = config.autoRotate ? 'toggle-btn active' : 'toggle-btn';
-                btnAuto.innerText = config.autoRotate ? 'ON' : 'OFF';
+                const btn = document.getElementById('ui-auto');
+                btn.className = config.autoRotate ? 'toggle-btn active' : 'toggle-btn';
+                btn.innerText = config.autoRotate ? 'ON' : 'OFF';
             };
             const updateTrailBtn = () => {
                 const btn = document.getElementById('ui-trail-toggle');
@@ -571,13 +638,12 @@
             updateAutoBtn(); updateTrailBtn(); updateOrbitRingBtn(); updateGravityBtn();
 
             const sidebar = document.getElementById('sidebar');
-            const btnMenu = document.getElementById('btn-menu');
-            btnMenu.addEventListener('click', (e) => {
+            document.getElementById('btn-menu').addEventListener('click', (e) => {
                 e.stopPropagation();
                 sidebar.classList.toggle('active');
             });
 
-            // 滑块控件
+            // 滑块绑定
             createSliderControl('ctrl-rad', config.sphereRadius, 1.0, 5.0, 0.1, v => { config.sphereRadius = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
             createSliderControl('ctrl-noise', config.noiseScale, 0.1, 5.0, 0.1, v => { config.noiseScale = v; generateTerrain(); saveConfig(); });
             createSliderControl('ctrl-amp', config.amplitude, 0.1, 2.0, 0.05, v => { config.amplitude = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
@@ -597,20 +663,11 @@
             document.getElementById('ui-orbitring-toggle').addEventListener('click', () => { config.showOrbitRing = !config.showOrbitRing; updateOrbitRingBtn(); saveConfig(); });
             document.getElementById('ui-gravity-toggle').addEventListener('click', () => { config.gravityEnabled = !config.gravityEnabled; updateGravityBtn(); saveConfig(); });
             
-            document.getElementById('ui-mode').addEventListener('change', (e) => { 
-                config.mode = parseInt(e.target.value); 
-                updateMaterialUniforms(); 
-                saveConfig(); 
-            });
-            
-            document.getElementById('ui-color').addEventListener('input', (e) => { 
-                config.baseColor = e.target.value; 
-                updateMaterialUniforms(); 
-                saveConfig(); 
-            });
+            document.getElementById('ui-mode').addEventListener('change', e => { config.mode = parseInt(e.target.value); updateMaterialUniforms(); saveConfig(); });
+            document.getElementById('ui-color').addEventListener('input', e => { config.baseColor = e.target.value; updateMaterialUniforms(); saveConfig(); });
             
             ['heat-low','heat-mid','heat-high'].forEach((id, idx) => {
-                document.getElementById(id).addEventListener('input', (e) => {
+                document.getElementById(id).addEventListener('input', e => {
                     if(idx===0) config.heatLow = e.target.value;
                     else if(idx===1) config.heatMid = e.target.value;
                     else config.heatHigh = e.target.value;
@@ -619,7 +676,7 @@
                 });
             });
 
-            document.getElementById('ui-pcolor').addEventListener('input', (e) => {
+            document.getElementById('ui-pcolor').addEventListener('input', e => {
                 config.shipColor = e.target.value;
                 ships.forEach(s => {
                     s.mesh.material.color.set(config.shipColor);
@@ -629,31 +686,28 @@
                 });
                 saveConfig();
             });
-            document.getElementById('ui-sstyle').addEventListener('change', (e) => {
+            document.getElementById('ui-sstyle').addEventListener('change', e => {
                 config.shipStyle = parseInt(e.target.value);
                 ships.forEach(s => { s.mesh.material.wireframe = (config.shipStyle === 0); });
                 saveConfig();
             });
-            document.getElementById('ui-gravity-color').addEventListener('input', (e) => {
+            document.getElementById('ui-gravity-color').addEventListener('input', e => {
                 config.gravityColor = e.target.value;
                 updateGravityLines();
                 saveConfig();
             });
         }
 
-        // --- 初始化3D场景 ---
         function init3D() {
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
             camera.position.set(0, 2.5, 10.5);
             camera.lookAt(0, 0, 0);
-
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
-
             raycaster = new THREE.Raycaster();
 
             customMaterial = new THREE.ShaderMaterial({
@@ -667,49 +721,21 @@
                     heatMid: { value: new THREE.Color(config.heatMid) },
                     heatHigh: { value: new THREE.Color(config.heatHigh) }
                 },
-                vertexShader: `
-                    uniform float baseRadius;
-                    varying float vElevation;
-                    void main() {
-                        vElevation = length(position) - baseRadius; 
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    }
-                `,
-                fragmentShader: `
-                    uniform vec3 baseColor;
-                    uniform int displayMode;
-                    uniform float brightness;
-                    uniform vec3 heatLow;
-                    uniform vec3 heatMid;
-                    uniform vec3 heatHigh;
-                    varying float vElevation;
-                    
-                    void main() {
-                        vec3 finalColor = baseColor;
-                        if (displayMode == 0) { 
-                            finalColor = baseColor * (0.7 + vElevation * 0.5);
-                        } else if (displayMode == 1) { 
-                            float h = clamp(vElevation * 1.2 + 0.2, 0.0, 1.0);
-                            if (h < 0.5) finalColor = mix(heatLow, heatMid, h * 2.0);
-                            else finalColor = mix(heatMid, heatHigh, (h - 0.5) * 2.0);
-                        }
-                        finalColor *= brightness;
-                        
-                        float depth = gl_FragCoord.z / gl_FragCoord.w;
-                        float fogFactor = smoothstep(6.0, 13.0, depth);
-                        finalColor = mix(finalColor, vec3(0.0), fogFactor);
-                        gl_FragColor = vec4(finalColor, 1.0);
-                    }
-                `,
-                wireframe: true, 
-                transparent: false,
-                depthWrite: true,
-                depthTest: true
+                vertexShader: `uniform float baseRadius; varying float vElevation; void main() { vElevation = length(position) - baseRadius; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+                fragmentShader: `uniform vec3 baseColor; uniform int displayMode; uniform float brightness; uniform vec3 heatLow; uniform vec3 heatMid; uniform vec3 heatHigh; varying float vElevation;
+                void main() {
+                    vec3 finalColor = baseColor;
+                    if (displayMode == 0) finalColor = baseColor * (0.7 + vElevation * 0.5);
+                    else if (displayMode == 1) { float h = clamp(vElevation * 1.2 + 0.2, 0.0, 1.0); if (h < 0.5) finalColor = mix(heatLow, heatMid, h * 2.0); else finalColor = mix(heatMid, heatHigh, (h - 0.5) * 2.0); }
+                    finalColor *= brightness;
+                    float fogFactor = smoothstep(6.0, 13.0, gl_FragCoord.z / gl_FragCoord.w);
+                    gl_FragColor = vec4(mix(finalColor, vec3(0.0), fogFactor), 1.0);
+                }`,
+                wireframe: true, transparent: false, depthWrite: true, depthTest: true
             });
 
             terrainMesh = new THREE.Mesh(new THREE.BufferGeometry(), customMaterial);
             scene.add(terrainMesh);
-
             generateTerrain();
             updateMaterialUniforms();
             initSpaceships();
@@ -719,16 +745,13 @@
 
         function generateTerrain() {
             const geometry = new THREE.IcosahedronGeometry(config.sphereRadius, Math.floor(config.gridRes));
-            const positions = geometry.attributes.position;
-            const vertex = new THREE.Vector3();
-            for (let i = 0; i < positions.count; i++) {
-                vertex.fromBufferAttribute(positions, i);
-                const nx = vertex.x * config.noiseScale;
-                const ny = vertex.y * config.noiseScale;
-                const nz = vertex.z * config.noiseScale;
-                const noiseVal = SimplexNoise.noise3D(nx, ny, nz);
-                vertex.normalize().multiplyScalar(config.sphereRadius + noiseVal * config.amplitude);
-                positions.setXYZ(i, vertex.x, vertex.y, vertex.z);
+            const pos = geometry.attributes.position;
+            const v = new THREE.Vector3();
+            for (let i = 0; i < pos.count; i++) {
+                v.fromBufferAttribute(pos, i);
+                const n = SimplexNoise.noise3D(v.x*config.noiseScale, v.y*config.noiseScale, v.z*config.noiseScale);
+                v.normalize().multiplyScalar(config.sphereRadius + n * config.amplitude);
+                pos.setXYZ(i, v.x, v.y, v.z);
             }
             geometry.computeVertexNormals();
             terrainMesh.geometry.dispose();
@@ -737,198 +760,84 @@
         }
 
         function initSpaceships() {
-            ships.forEach(s => {
-                scene.remove(s.orbitGroup);
-                scene.remove(s.shadow);
-                scene.remove(s.trailLine);
-            });
-            gravityLines.forEach(line => scene.remove(line));
-            ships = [];
-            gravityLines = [];
-            
-            const shipGeo = new THREE.ConeGeometry(0.04, 0.16, 4);
-            shipGeo.rotateX(Math.PI / 2);
+            ships.forEach(s => { scene.remove(s.orbitGroup); scene.remove(s.shadow); scene.remove(s.trailLine); });
+            gravityLines.forEach(l => scene.remove(l));
+            ships = []; gravityLines = [];
+            const geo = new THREE.ConeGeometry(0.04, 0.16, 4); geo.rotateX(Math.PI/2);
             for(let i=0; i<config.shipCount; i++) {
-                let orbitGroup = new THREE.Group();
-                scene.add(orbitGroup);
-                let pivot = new THREE.Group();
-                orbitGroup.add(pivot);
-                let container = new THREE.Group();
-                pivot.add(container);
-                let shipMat = new THREE.MeshBasicMaterial({ color: config.shipColor, wireframe: config.shipStyle === 0 });
-                let shipMesh = new THREE.Mesh(shipGeo, shipMat);
-                container.add(shipMesh);
-                let shipLight = new THREE.PointLight(config.shipColor, 1.5, 3.0);
-                container.add(shipLight);
+                let orbitGroup = new THREE.Group(); scene.add(orbitGroup);
+                let pivot = new THREE.Group(); orbitGroup.add(pivot);
+                let container = new THREE.Group(); pivot.add(container);
+                let mat = new THREE.MeshBasicMaterial({ color: config.shipColor, wireframe: config.shipStyle===0 });
+                let mesh = new THREE.Mesh(geo, mat); container.add(mesh);
+                let light = new THREE.PointLight(config.shipColor, 1.5, 3.0); container.add(light);
                 container.scale.set(config.shipSize, config.shipSize, config.shipSize);
-
-                const orbitLineMat = new THREE.LineBasicMaterial({ color: config.shipColor, transparent: true, opacity: 0.2 });
-                const orbitLine = new THREE.Line(new THREE.BufferGeometry(), orbitLineMat);
+                let orbitLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: config.shipColor, transparent: true, opacity: 0.2 }));
                 orbitGroup.add(orbitLine);
-
-                const trailMat = new THREE.LineBasicMaterial({ color: config.shipColor, transparent: true, opacity: 0.9 });
-                const trailLine = new THREE.Line(new THREE.BufferGeometry(), trailMat);
+                let trailLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: config.shipColor, transparent: true, opacity: 0.9 }));
                 scene.add(trailLine);
-
-                const shadowGeo = new THREE.CircleGeometry(0.08, 16);
-                const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5 });
-                let shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
-                scene.add(shadowMesh);
-
-                // 引力虚线 (LineDashedMaterial)
-                const dashMaterial = new THREE.LineDashedMaterial({ 
-                    color: new THREE.Color(config.gravityColor).multiplyScalar(config.gravityBrightness),
-                    dashSize: 0.03, gapSize: 0.02 
-                });
-                const gravityLine = new THREE.Line(new THREE.BufferGeometry(), dashMaterial);
-                gravityLine.visible = config.gravityEnabled;
-                scene.add(gravityLine);
-                gravityLines.push(gravityLine);
-
-                ships.push({
-                    orbitGroup, pivot, container, mesh: shipMesh, light: shipLight,
-                    shadow: shadowMesh, orbitLine, trailLine,
-                    history: [], baseSpeed: 0, gravityLine
-                });
+                let shadow = new THREE.Mesh(new THREE.CircleGeometry(0.08,16), new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:0.5 }));
+                scene.add(shadow);
+                let gLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color: config.gravityColor, dashSize:0.03, gapSize:0.02 }));
+                gLine.visible = config.gravityEnabled; scene.add(gLine); gravityLines.push(gLine);
+                ships.push({ orbitGroup, pivot, container, mesh, light, shadow, orbitLine, trailLine, history:[], baseSpeed:0, gravityLine: gLine });
             }
-            randomizeOrbits();
-            updateGravityLines();
+            randomizeOrbits(); updateGravityLines();
         }
 
         function randomizeOrbits() {
-            const maxPlanetRadius = config.sphereRadius + config.amplitude;
-            ships.forEach((ship, index) => {
-                const orbitRadius = maxPlanetRadius + config.hoverHeight + (index * 0.35) + (Math.random() * 0.1);
-                const inc = Math.random() * Math.PI;
-                const lan = Math.random() * Math.PI * 2;
-                ship.orbitGroup.rotation.set(inc, lan, 0, 'YXZ');
-                ship.container.position.set(orbitRadius, 0, 0);
-                ship.baseSpeed = (Math.random() * 0.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
-                const orbitPoints = [];
-                for(let j=0; j<=64; j++) {
-                    const angle = (j / 64) * Math.PI * 2;
-                    orbitPoints.push(new THREE.Vector3(Math.cos(angle)*orbitRadius, 0, Math.sin(angle)*orbitRadius));
-                }
-                ship.orbitLine.geometry.setFromPoints(orbitPoints);
-                ship.history = [];
-                ship.trailLine.geometry.setFromPoints([new THREE.Vector3()]);
+            const maxR = config.sphereRadius + config.amplitude;
+            ships.forEach((s, i) => {
+                const r = maxR + config.hoverHeight + i*0.35 + Math.random()*0.1;
+                s.orbitGroup.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI*2, 0, 'YXZ');
+                s.container.position.set(r,0,0);
+                s.baseSpeed = (Math.random()*0.5+0.5)*(Math.random()>0.5?1:-1);
+                const pts = []; for(let j=0;j<=64;j++){ const a=(j/64)*Math.PI*2; pts.push(new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r)); }
+                s.orbitLine.geometry.setFromPoints(pts);
+                s.history=[]; s.trailLine.geometry.setFromPoints([new THREE.Vector3()]);
             });
         }
 
         function setupInteractions(canvas) {
-            const onDown = (e) => {
-                if (e.touches) { isTouchActive = true; e.preventDefault(); }
-                else if (isTouchActive) return;
-                isDragging = true; dragDistance = 0;
-                const pos = e.touches ? e.touches[0] : e;
-                previousMousePosition = { x: pos.clientX, y: pos.clientY };
-            };
-            const onUp = (e) => {
-                if (e.touches) { isTouchActive = false; e.preventDefault(); }
-                else if (isTouchActive) { isTouchActive = false; return; }
-                if (isDragging && dragDistance < 5) {
-                    document.getElementById('sidebar').classList.toggle('active');
-                }
-                isDragging = false;
-            };
-            const onMove = (e) => {
-                if (!isDragging) return;
-                if (e.touches) e.preventDefault();
-                const pos = e.touches ? e.touches[0] : e;
-                const deltaX = pos.clientX - previousMousePosition.x;
-                const deltaY = pos.clientY - previousMousePosition.y;
-                dragDistance += Math.abs(deltaX) + Math.abs(deltaY);
-                const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(deltaY * 0.005, deltaX * 0.005, 0, 'YXZ'));
-                terrainMesh.quaternion.multiplyQuaternions(q, terrainMesh.quaternion);
-                ships.forEach(s => s.orbitGroup.quaternion.multiplyQuaternions(q, s.orbitGroup.quaternion));
-                previousMousePosition = { x: pos.clientX, y: pos.clientY };
-            };
-            canvas.addEventListener('mousedown', onDown);
-            window.addEventListener('mouseup', onUp);
-            window.addEventListener('mousemove', onMove);
-            canvas.addEventListener('touchstart', onDown, {passive: false});
-            window.addEventListener('touchend', onUp);
-            window.addEventListener('touchmove', onMove, {passive: false});
+            const onDown = (e) => { if(e.touches){ isTouchActive=true; e.preventDefault(); } else if(isTouchActive) return; isDragging=true; dragDistance=0; const p=e.touches?e.touches[0]:e; previousMousePosition={x:p.clientX,y:p.clientY}; };
+            const onUp = (e) => { if(e.touches){ isTouchActive=false; e.preventDefault(); } else if(isTouchActive){ isTouchActive=false; return; } if(isDragging && dragDistance<5) document.getElementById('sidebar').classList.toggle('active'); isDragging=false; };
+            const onMove = (e) => { if(!isDragging) return; if(e.touches) e.preventDefault(); const p=e.touches?e.touches[0]:e; const dx=p.clientX-previousMousePosition.x, dy=p.clientY-previousMousePosition.y; dragDistance+=Math.abs(dx)+Math.abs(dy); const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(dy*0.005,dx*0.005,0,'YXZ')); terrainMesh.quaternion.multiplyQuaternions(q,terrainMesh.quaternion); ships.forEach(s=>s.orbitGroup.quaternion.multiplyQuaternions(q,s.orbitGroup.quaternion)); previousMousePosition={x:p.clientX,y:p.clientY}; };
+            canvas.addEventListener('mousedown',onDown); window.addEventListener('mouseup',onUp); window.addEventListener('mousemove',onMove);
+            canvas.addEventListener('touchstart',onDown,{passive:false}); window.addEventListener('touchend',onUp); window.addEventListener('touchmove',onMove,{passive:false});
         }
 
         function onWindowResize() {
-            const container = document.getElementById('canvas-container');
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            const c = document.getElementById('canvas-container');
+            camera.aspect = c.clientWidth / c.clientHeight; camera.updateProjectionMatrix();
+            renderer.setSize(c.clientWidth, c.clientHeight);
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            timeGlobal += 0.01;
-            customMaterial.uniforms.time.value = timeGlobal;
-
-            if (config.autoRotate && !isDragging) {
-                autoRotAxis.x = Math.sin(timeGlobal * 0.15);
-                autoRotAxis.y = Math.cos(timeGlobal * 0.1);
-                autoRotAxis.z = Math.sin(timeGlobal * 0.05);
-                autoRotAxis.normalize();
-                const rotAngle = 0.005 * config.planetSpeed;
-                terrainMesh.rotateOnAxis(autoRotAxis, rotAngle);
-                ships.forEach(s => s.orbitGroup.rotateOnAxis(autoRotAxis, rotAngle));
+            timeGlobal+=0.01; customMaterial.uniforms.time.value=timeGlobal;
+            if(config.autoRotate && !isDragging) {
+                autoRotAxis.set(Math.sin(timeGlobal*0.15), Math.cos(timeGlobal*0.1), Math.sin(timeGlobal*0.05)).normalize();
+                terrainMesh.rotateOnAxis(autoRotAxis, 0.005*config.planetSpeed);
+                ships.forEach(s=>s.orbitGroup.rotateOnAxis(autoRotAxis, 0.005*config.planetSpeed));
             }
-
-            ships.forEach(ship => {
-                const oldPos = new THREE.Vector3();
-                ship.container.getWorldPosition(oldPos);
-                const stepAngle = ship.baseSpeed * config.shipSpeed * 0.02;
-                ship.pivot.rotateY(stepAngle);
-                const newPos = new THREE.Vector3();
-                ship.container.getWorldPosition(newPos);
-                
-                const forward = newPos.clone().sub(oldPos).normalize();
-                const up = newPos.clone().normalize();
-                ship.container.up.copy(up);
-                ship.container.lookAt(newPos.clone().add(forward));
-
-                raycaster.set(newPos, up.clone().negate());
-                const intersects = raycaster.intersectObject(terrainMesh, false);
-                if (intersects.length > 0) {
-                    const hit = intersects[0];
-                    const normal = hit.face.normal.clone();
-                    ship.shadow.visible = true;
-                    ship.shadow.position.copy(hit.point).add(normal.multiplyScalar(0.02));
-                    ship.shadow.lookAt(hit.point.clone().add(normal));
-                    ship.shadow.material.opacity = Math.max(0.0, 0.7 - (hit.distance * 0.4));
-                    
-                    // 更新引力虚线
-                    if (config.gravityEnabled) {
-                        const points = [newPos.clone(), ship.shadow.position.clone()];
-                        ship.gravityLine.geometry.setFromPoints(points);
-                        ship.gravityLine.computeLineDistances();
-                    }
-                } else {
-                    ship.shadow.visible = false;
-                    if (config.gravityEnabled) ship.gravityLine.geometry.setFromPoints([]);
-                }
-
-                ship.orbitLine.visible = config.showOrbitRing;
-                if (config.showTrail) {
-                    ship.trailLine.visible = true;
-                    if (Math.abs(stepAngle) > 0.001 || isDragging) {
-                        ship.history.push(newPos.clone());
-                        if (ship.history.length > 40) ship.history.shift();
-                        ship.trailLine.geometry.setFromPoints(ship.history);
-                    }
-                } else {
-                    ship.trailLine.visible = false;
-                }
+            ships.forEach(s=>{
+                const old=new THREE.Vector3(); s.container.getWorldPosition(old);
+                s.pivot.rotateY(s.baseSpeed*config.shipSpeed*0.02);
+                const neo=new THREE.Vector3(); s.container.getWorldPosition(neo);
+                const up=neo.clone().normalize(); s.container.up.copy(up); s.container.lookAt(neo.clone().add(neo.clone().sub(old).normalize()));
+                raycaster.set(neo, up.clone().negate()); const hits=raycaster.intersectObject(terrainMesh);
+                if(hits.length){
+                    const h=hits[0], n=h.face.normal.clone(); s.shadow.visible=true; s.shadow.position.copy(h.point).add(n.multiplyScalar(0.02));
+                    s.shadow.lookAt(h.point.clone().add(n)); s.shadow.material.opacity=Math.max(0,0.7-h.distance*0.4);
+                    if(config.gravityEnabled){ s.gravityLine.geometry.setFromPoints([neo.clone(), s.shadow.position.clone()]); s.gravityLine.computeLineDistances(); }
+                } else { s.shadow.visible=false; if(config.gravityEnabled) s.gravityLine.geometry.setFromPoints([]); }
+                s.orbitLine.visible=config.showOrbitRing;
+                if(config.showTrail){ s.trailLine.visible=true; if(Math.abs(s.baseSpeed*config.shipSpeed*0.02)>0.001||isDragging){ s.history.push(neo.clone()); if(s.history.length>40)s.history.shift(); s.trailLine.geometry.setFromPoints(s.history); } } else s.trailLine.visible=false;
             });
-
             renderer.render(scene, camera);
         }
 
-        window.onload = () => {
-            loadConfig(); 
-            initUI();     
-            init3D();
-            animate();
-        };
+        window.onload = () => { loadConfig(); initUI(); init3D(); animate(); };
     })();
 </script>
 </body>
