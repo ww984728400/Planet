@@ -3,7 +3,7 @@
 
   <head>
     <meta charset="UTF-8">
-    <title>Planet</title>
+    <title>planet 2.0</title>
     
 
   </head>
@@ -20,9 +20,9 @@
 
         :root {
             --bg: #050505;
-            --main: #ff5500;          /* 动态同步星球线框颜色，所有UI主色 */
-            --accent: #00eeff;         /* 辅助强调色（用于数值显示等） */
-            --text-dim: #884422;       /* 已弃用，改为基于main的透明度 */
+            --main: #ff5500;          
+            --accent: #00eeff;         
+            --text-dim: #884422;       
             --ui-glow: rgba(255, 85, 0, 0.2);
         }
 
@@ -52,7 +52,6 @@
             cursor: crosshair;
         }
 
-        /* 菜单按钮 — 无高亮，完全统一色调 */
         #btn-menu {
             position: absolute;
             top: 20px;
@@ -85,11 +84,10 @@
             border-radius: 0;
         }
 
-        /* 右侧控制台面板 */
         #sidebar {
             position: absolute;
             top: 0; right: 0;
-            width: 400px;           /* 稍微加宽以适应更好布局 */
+            width: 400px;
             height: 100vh;
             border-left: 1px solid var(--main);
             background: rgba(5, 5, 5, 0.94);
@@ -160,7 +158,6 @@
             text-transform: none;
         }
 
-        /* 滑块容器 */
         .slider-container {
             display: flex;
             align-items: center;
@@ -198,28 +195,56 @@
             letter-spacing: 0.5px;
         }
 
-        /* 按钮和选择框完全统一为main色 */
-        .toggle-btn {
-            background: transparent; 
-            border: 1px solid var(--main);
-            color: var(--main); 
-            padding: 4px 12px; 
+        /* 滑块开关 (无文字) */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 22px;
+            border: 1.5px solid var(--main);
+            background: transparent;
+            box-sizing: content-box;
             cursor: pointer;
-            font-family: inherit; 
-            font-size: 12px; 
-            min-width: 64px; 
-            height: 30px;
-            letter-spacing: 1.2px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+        .slider-switch {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(10,10,10,0.8);
             transition: none;
-            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            padding: 2px;
         }
-        .toggle-btn.active { 
-            background: var(--main); 
-            color: var(--bg); 
-            border-color: var(--main);
+        .slider-switch:before {
+            content: "";
+            height: 16px;
+            width: 16px;
+            background-color: var(--main);
+            box-shadow: 0 0 8px var(--main);
+            transition: transform 0.15s;
+            transform: translateX(2px);
         }
-        .toggle-btn:hover { background: transparent; color: var(--main); }
-        .toggle-btn.active:hover { background: var(--main); color: var(--bg); }
+        .switch input:checked + .slider-switch:before {
+            transform: translateX(28px);
+        }
+        .switch input:checked + .slider-switch {
+            background-color: rgba(30,30,30,0.9);
+        }
 
         .action-btn {
             background: rgba(255, 85, 0, 0.1); 
@@ -281,7 +306,6 @@
             text-transform: uppercase;
         }
 
-        /* 分割线，视觉清爽 */
         .divider {
             height: 1px;
             background: var(--main);
@@ -289,7 +313,6 @@
             margin: 8px 0 2px;
         }
 
-        /* 扫描线效果 */
         #scanlines {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
@@ -298,15 +321,10 @@
             pointer-events: none; z-index: 5;
         }
 
-        /* 滚动条颜色同步 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0a0a0a; }
         ::-webkit-scrollbar-thumb { background: var(--main); border-radius: 0; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        /* 辅助布局 */
-        .inline-flex { display: flex; align-items: center; gap: 10px; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     </style>
 </head>
 <body>
@@ -320,11 +338,9 @@
     <div id="canvas-container"></div>
     
     <div id="sidebar">
-        <!-- ========== 地形参数面板 (逻辑重排) ========= -->
+        <!-- 地形参数面板 -->
         <div class="panel">
             <div class="panel-title">TERRAIN 地形参数</div>
-            
-            <!-- 基础几何 -->
             <div class="control-row">
                 <div class="control-label">RADIUS<span class="cn">星球半径</span></div>
                 <div id="ctrl-rad" class="slider-container"></div>
@@ -333,10 +349,7 @@
                 <div class="control-label">RESOLUTION<span class="cn">网格细分</span></div>
                 <div id="ctrl-res" class="slider-container"></div>
             </div>
-            
             <div class="divider"></div>
-            
-            <!-- 噪声与幅度 -->
             <div class="control-row">
                 <div class="control-label">NOISE SCALE<span class="cn">地貌缩放</span></div>
                 <div id="ctrl-noise" class="slider-container"></div>
@@ -345,10 +358,7 @@
                 <div class="control-label">AMPLITUDE<span class="cn">起伏幅度</span></div>
                 <div id="ctrl-amp" class="slider-container"></div>
             </div>
-            
             <div class="divider"></div>
-            
-            <!-- 视觉样式 -->
             <div class="control-row">
                 <div class="control-label">LINE WIDTH<span class="cn">网格线宽</span></div>
                 <div id="ctrl-linewidth" class="slider-container"></div>
@@ -357,7 +367,6 @@
                 <div class="control-label">BRIGHTNESS<span class="cn">地形亮度</span></div>
                 <div id="ctrl-bright" class="slider-container"></div>
             </div>
-            
             <div class="control-row">
                 <div class="control-label">RENDER MODE<span class="cn">渲染模式</span></div>
                 <select id="ui-mode">
@@ -365,12 +374,10 @@
                     <option value="1">HEATMAP 热力</option>
                 </select>
             </div>
-            
             <div class="control-row">
                 <div class="control-label">BASE COLOR<span class="cn">网格基础色</span></div>
                 <input type="color" id="ui-color" class="color-picker" value="#0088ff">
             </div>
-            
             <div class="control-row block">
                 <div class="control-label">HEAT GRADIENT<span class="cn">热力渐变色 (低/中/高)</span></div>
                 <div class="color-group">
@@ -381,12 +388,12 @@
             </div>
         </div>
 
-        <!-- ========== 运动控制面板 ========= -->
+        <!-- 运动控制面板 -->
         <div class="panel">
             <div class="panel-title">MOTION 运动控制</div>
             <div class="control-row">
                 <div class="control-label">AUTO ROTATE<span class="cn">星球自转</span></div>
-                <button id="ui-auto" class="toggle-btn active">ON</button>
+                <div id="switch-auto-rotate" class="switch-container"></div>
             </div>
             <div class="control-row">
                 <div class="control-label">ROT. SPEED<span class="cn">自转速度</span></div>
@@ -394,11 +401,9 @@
             </div>
         </div>
 
-        <!-- ========== 舰队系统面板 (重新组织) ========= -->
+        <!-- 舰队系统面板 -->
         <div class="panel">
             <div class="panel-title">FLEET 飞船舰队</div>
-            
-            <!-- 数量与随机 -->
             <div class="control-row">
                 <div class="control-label">SHIP COUNT<span class="cn">飞船数量</span></div>
                 <div id="ctrl-scount" class="slider-container"></div>
@@ -406,10 +411,7 @@
             <div class="control-row block">
                 <button id="btn-rand-orbits" class="action-btn">⟳ RANDOMIZE ORBITS 随机轨道</button>
             </div>
-            
             <div class="divider"></div>
-            
-            <!-- 轨道参数 -->
             <div class="control-row">
                 <div class="control-label">ORBIT SPEED<span class="cn">公转速度</span></div>
                 <div id="ctrl-sspeed" class="slider-container"></div>
@@ -418,22 +420,16 @@
                 <div class="control-label">BASE ALTITUDE<span class="cn">基准高度</span></div>
                 <div id="ctrl-hover" class="slider-container"></div>
             </div>
-            
             <div class="divider"></div>
-            
-            <!-- 视觉开关 -->
             <div class="control-row">
                 <div class="control-label">TRAIL<span class="cn">航迹显示</span></div>
-                <button id="ui-trail-toggle" class="toggle-btn active">ON</button>
+                <div id="switch-trail" class="switch-container"></div>
             </div>
             <div class="control-row">
                 <div class="control-label">ORBIT RING<span class="cn">轨道环</span></div>
-                <button id="ui-orbitring-toggle" class="toggle-btn active">ON</button>
+                <div id="switch-orbitring" class="switch-container"></div>
             </div>
-            
             <div class="divider"></div>
-            
-            <!-- 飞船外观 -->
             <div class="control-row">
                 <div class="control-label">SHIP SIZE<span class="cn">尺寸</span></div>
                 <div id="ctrl-ssize" class="slider-container"></div>
@@ -449,13 +445,10 @@
                     <option value="1">SOLID 实体</option>
                 </select>
             </div>
-            
             <div class="divider"></div>
-            
-            <!-- 引力连线系统 -->
             <div class="control-row">
-                <div class="control-label">GRAVITY LINK<span class="cn">引力虚线 (飞船↔投影)</span></div>
-                <button id="ui-gravity-toggle" class="toggle-btn">OFF</button>
+                <div class="control-label">GRAVITY LINK<span class="cn">引力虚线</span></div>
+                <div id="switch-gravity" class="switch-container"></div>
             </div>
             <div class="control-row">
                 <div class="control-label">LINK COLOR<span class="cn">连线颜色</span></div>
@@ -464,6 +457,40 @@
             <div class="control-row">
                 <div class="control-label">LINK BRIGHT<span class="cn">连线亮度</span></div>
                 <div id="ctrl-gravity-bright" class="slider-container"></div>
+            </div>
+        </div>
+
+        <!-- 陨石系统面板 -->
+        <div class="panel">
+            <div class="panel-title">METEOR 陨石系统</div>
+            <div class="control-row">
+                <div class="control-label">ENABLE<span class="cn">启用陨石</span></div>
+                <div id="switch-meteor" class="switch-container"></div>
+            </div>
+            <div class="control-row">
+                <div class="control-label">COLOR<span class="cn">陨石颜色</span></div>
+                <input type="color" id="meteor-color" class="color-picker" value="#ccaa88">
+            </div>
+            <div class="control-row">
+                <div class="control-label">SPEED<span class="cn">飞行速度</span></div>
+                <div id="ctrl-meteor-speed" class="slider-container"></div>
+            </div>
+            <div class="control-row">
+                <div class="control-label">DENSITY<span class="cn">生成密度</span></div>
+                <div id="ctrl-meteor-density" class="slider-container"></div>
+            </div>
+            <div class="control-row">
+                <div class="control-label">SIZE BASE<span class="cn">基础大小</span></div>
+                <div id="ctrl-meteor-size" class="slider-container"></div>
+            </div>
+            <div class="control-row">
+                <div class="control-label">LOCK DIST.<span class="cn">锁定距离</span></div>
+                <div id="ctrl-lock-dist" class="slider-container"></div>
+            </div>
+            <div class="divider"></div>
+            <div class="control-row">
+                <div class="control-label">LOCK INDICATOR<span class="cn">锁定连线</span></div>
+                <div id="switch-lock-line" class="switch-container"></div>
             </div>
         </div>
     </div>
@@ -532,10 +559,18 @@
             shipStyle: 0,
             gravityEnabled: false,
             gravityColor: '#ffaa00',
-            gravityBrightness: 1.0
+            gravityBrightness: 1.0,
+            // 陨石配置
+            meteorEnabled: true,
+            meteorColor: '#ccaa88',
+            meteorSpeed: 0.8,
+            meteorDensity: 1.2,
+            meteorSize: 0.65,
+            lockDistance: 2.8,
+            showLockLine: true,
         };
 
-        const LOCAL_STORAGE_KEY = 'terrain_console_config_v7';
+        const LOCAL_STORAGE_KEY = 'terrain_console_config_v10';
 
         function loadConfig() {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -543,11 +578,9 @@
         }
         function saveConfig() { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config)); }
 
-        // 同步CSS主色调 (所有UI跟随星球线框颜色)
         function syncMainColor(color) {
             document.documentElement.style.setProperty('--main', color);
             document.documentElement.style.setProperty('--ui-glow', color + '40');
-            // 同时调整accent为稍亮的版本 (保持可见)
             const c = new THREE.Color(color);
             c.multiplyScalar(1.5);
             document.documentElement.style.setProperty('--accent', '#' + c.getHexString());
@@ -557,12 +590,110 @@
         let terrainMesh, customMaterial;
         let ships = []; 
         let gravityLines = [];
+        let meteors = [];            
+        let impactFlashes = [];       
+        let lockExplosions = [];      
         let isDragging = false;
         let dragDistance = 0; 
         let previousMousePosition = { x: 0, y: 0 };
         let autoRotAxis = new THREE.Vector3(1, 1, 0).normalize();
         let timeGlobal = 0;
         let isTouchActive = false;
+        let meteorSpawnAcc = 0;
+
+        // 工具：创建无辐条圆环 (LineLoop)
+        function createRingLine(radius, color, segments = 32) {
+            const points = [];
+            for (let i = 0; i <= segments; i++) {
+                const theta = (i / segments) * Math.PI * 2;
+                points.push(new THREE.Vector3(Math.cos(theta) * radius, Math.sin(theta) * radius, 0));
+            }
+            const geom = new THREE.BufferGeometry().setFromPoints(points);
+            return new THREE.LineLoop(geom, new THREE.LineBasicMaterial({ color: color }));
+        }
+
+        // 陨石模型：球体 + 三个无辐条圆环
+        function createMeteorMesh(color, size) {
+            const group = new THREE.Group();
+            const sphereMat = new THREE.MeshStandardMaterial({ 
+                color: color, 
+                emissive: color, 
+                emissiveIntensity: 0.5,
+                roughness: 0.3
+            });
+            const sphere = new THREE.Mesh(new THREE.SphereGeometry(size * 0.4, 8, 6), sphereMat);
+            group.add(sphere);
+            
+            const ringMat = new THREE.LineBasicMaterial({ color: color });
+            const ring1 = createRingLine(size * 0.65, color);
+            const ring2 = createRingLine(size * 0.65, color);
+            const ring3 = createRingLine(size * 0.65, color);
+            ring1.rotation.x = Math.PI / 2;
+            ring2.rotation.y = Math.PI / 2;
+            ring3.rotation.z = Math.PI / 2;
+            group.add(ring1, ring2, ring3);
+            
+            return group;
+        }
+
+        // 生成新陨石
+        function spawnMeteor() {
+            if (!config.meteorEnabled) return;
+            const color = config.meteorColor;
+            const size = config.meteorSize * (0.8 + Math.random() * 0.6);
+            const mesh = createMeteorMesh(color, size);
+            
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const r = config.sphereRadius + config.amplitude + 5.0 + Math.random() * 4;
+            const pos = new THREE.Vector3(
+                r * Math.sin(phi) * Math.cos(theta),
+                r * Math.sin(phi) * Math.sin(theta),
+                r * Math.cos(phi)
+            );
+            mesh.position.copy(pos);
+            mesh.userData.velocity = pos.clone().normalize().negate().multiplyScalar(config.meteorSpeed * (0.7 + Math.random() * 0.6));
+            mesh.userData.size = size;
+            mesh.userData.lockTimer = 0;
+            mesh.userData.lockedBy = null;
+            scene.add(mesh);
+            meteors.push(mesh);
+        }
+
+        // 撞击闪光：单个无辐条圆环，半径为陨石1.5倍
+        function addImpactFlash(position, color, size) {
+            const ring = createRingLine(size * 1.5, new THREE.Color(color).multiplyScalar(1.5));
+            ring.position.copy(position);
+            const normal = position.clone().normalize();
+            ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+            scene.add(ring);
+            impactFlashes.push({ mesh: ring, life: 0.6, maxLife: 0.6 });
+        }
+
+        // 锁定爆炸：三个虚线圆环向外扩散
+        function addLockExplosion(position, color, size) {
+            const dashMaterial = new THREE.LineDashedMaterial({ color: color, dashSize: 0.05, gapSize: 0.04 });
+            const rings = [
+                new THREE.LineLoop(new THREE.BufferGeometry(), dashMaterial),
+                new THREE.LineLoop(new THREE.BufferGeometry(), dashMaterial),
+                new THREE.LineLoop(new THREE.BufferGeometry(), dashMaterial)
+            ];
+            rings[0].rotation.x = Math.PI / 2;
+            rings[1].rotation.y = Math.PI / 2;
+            rings[2].rotation.z = Math.PI / 2;
+            
+            const group = new THREE.Group();
+            rings.forEach(r => group.add(r));
+            group.position.copy(position);
+            scene.add(group);
+            
+            lockExplosions.push({
+                group, rings, size,
+                progress: 0,
+                duration: 0.8,
+                color: color
+            });
+        }
 
         // 滑块控件
         function createSliderControl(containerId, value, min, max, step, onChange) {
@@ -579,6 +710,22 @@
                 onChange(val);
             });
             return { range, span };
+        }
+
+        // 滑块开关 (无文字描述)
+        function createSwitch(containerId, initialState, onChange) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <label class="switch">
+                    <input type="checkbox" ${initialState ? 'checked' : ''}>
+                    <span class="slider-switch"></span>
+                </label>
+            `;
+            const checkbox = container.querySelector('input');
+            checkbox.addEventListener('change', () => {
+                onChange(checkbox.checked);
+            });
+            return { checkbox, setState: (val) => { checkbox.checked = val; } };
         }
 
         function updateMaterialUniforms() {
@@ -602,6 +749,21 @@
             });
         }
 
+        // 更新所有飞船颜色 (包括材质、发光、灯光、轨道环、航迹线)
+        function updateShipColor(colorHex) {
+            const color = new THREE.Color(colorHex);
+            ships.forEach(s => {
+                if (s.mesh.material) {
+                    s.mesh.material.color.set(color);
+                    s.mesh.material.emissive.set(color);
+                }
+                if (s.light) s.light.color.set(color);
+                if (s.orbitLine) s.orbitLine.material.color.set(color);
+                if (s.trailLine) s.trailLine.material.color.set(color);
+                if (s.lockLine) s.lockLine.material.color.set(color);
+            });
+        }
+
         function initUI() {
             document.getElementById('ui-mode').value = config.mode;
             document.getElementById('ui-color').value = config.baseColor;
@@ -611,31 +773,9 @@
             document.getElementById('heat-mid').value = config.heatMid;
             document.getElementById('heat-high').value = config.heatHigh;
             document.getElementById('ui-gravity-color').value = config.gravityColor;
+            document.getElementById('meteor-color').value = config.meteorColor;
 
             syncMainColor(config.baseColor);
-
-            const updateAutoBtn = () => {
-                const btn = document.getElementById('ui-auto');
-                btn.className = config.autoRotate ? 'toggle-btn active' : 'toggle-btn';
-                btn.innerText = config.autoRotate ? 'ON' : 'OFF';
-            };
-            const updateTrailBtn = () => {
-                const btn = document.getElementById('ui-trail-toggle');
-                btn.className = config.showTrail ? 'toggle-btn active' : 'toggle-btn';
-                btn.innerText = config.showTrail ? 'ON' : 'OFF';
-            };
-            const updateOrbitRingBtn = () => {
-                const btn = document.getElementById('ui-orbitring-toggle');
-                btn.className = config.showOrbitRing ? 'toggle-btn active' : 'toggle-btn';
-                btn.innerText = config.showOrbitRing ? 'ON' : 'OFF';
-            };
-            const updateGravityBtn = () => {
-                const btn = document.getElementById('ui-gravity-toggle');
-                btn.className = config.gravityEnabled ? 'toggle-btn active' : 'toggle-btn';
-                btn.innerText = config.gravityEnabled ? 'ON' : 'OFF';
-                updateGravityLines();
-            };
-            updateAutoBtn(); updateTrailBtn(); updateOrbitRingBtn(); updateGravityBtn();
 
             const sidebar = document.getElementById('sidebar');
             document.getElementById('btn-menu').addEventListener('click', (e) => {
@@ -656,34 +796,35 @@
             createSliderControl('ctrl-hover', config.hoverHeight, 0.1, 2.0, 0.05, v => { config.hoverHeight = v; randomizeOrbits(); saveConfig(); });
             createSliderControl('ctrl-ssize', config.shipSize, 0.2, 3.0, 0.1, v => { config.shipSize = v; ships.forEach(s => s.container.scale.set(v,v,v)); saveConfig(); });
             createSliderControl('ctrl-gravity-bright', config.gravityBrightness, 0.2, 2.5, 0.1, v => { config.gravityBrightness = v; updateGravityLines(); saveConfig(); });
+            
+            createSliderControl('ctrl-meteor-speed', config.meteorSpeed, 0.2, 2.5, 0.1, v => { config.meteorSpeed = v; saveConfig(); });
+            createSliderControl('ctrl-meteor-density', config.meteorDensity, 0.2, 3.0, 0.1, v => { config.meteorDensity = v; saveConfig(); });
+            createSliderControl('ctrl-meteor-size', config.meteorSize, 0.3, 2.0, 0.1, v => { config.meteorSize = v; saveConfig(); });
+            createSliderControl('ctrl-lock-dist', config.lockDistance, 1.0, 5.0, 0.1, v => { config.lockDistance = v; saveConfig(); });
+
+            // 开关
+            createSwitch('switch-auto-rotate', config.autoRotate, v => { config.autoRotate = v; saveConfig(); });
+            createSwitch('switch-trail', config.showTrail, v => { config.showTrail = v; saveConfig(); });
+            createSwitch('switch-orbitring', config.showOrbitRing, v => { config.showOrbitRing = v; saveConfig(); });
+            createSwitch('switch-gravity', config.gravityEnabled, v => { config.gravityEnabled = v; updateGravityLines(); saveConfig(); });
+            createSwitch('switch-meteor', config.meteorEnabled, v => { config.meteorEnabled = v; saveConfig(); });
+            createSwitch('switch-lock-line', config.showLockLine, v => { config.showLockLine = v; saveConfig(); });
 
             document.getElementById('btn-rand-orbits').addEventListener('click', () => { randomizeOrbits(); saveConfig(); });
-            document.getElementById('ui-auto').addEventListener('click', () => { config.autoRotate = !config.autoRotate; updateAutoBtn(); saveConfig(); });
-            document.getElementById('ui-trail-toggle').addEventListener('click', () => { config.showTrail = !config.showTrail; updateTrailBtn(); saveConfig(); });
-            document.getElementById('ui-orbitring-toggle').addEventListener('click', () => { config.showOrbitRing = !config.showOrbitRing; updateOrbitRingBtn(); saveConfig(); });
-            document.getElementById('ui-gravity-toggle').addEventListener('click', () => { config.gravityEnabled = !config.gravityEnabled; updateGravityBtn(); saveConfig(); });
             
             document.getElementById('ui-mode').addEventListener('change', e => { config.mode = parseInt(e.target.value); updateMaterialUniforms(); saveConfig(); });
             document.getElementById('ui-color').addEventListener('input', e => { config.baseColor = e.target.value; updateMaterialUniforms(); saveConfig(); });
-            
             ['heat-low','heat-mid','heat-high'].forEach((id, idx) => {
                 document.getElementById(id).addEventListener('input', e => {
                     if(idx===0) config.heatLow = e.target.value;
                     else if(idx===1) config.heatMid = e.target.value;
                     else config.heatHigh = e.target.value;
-                    updateMaterialUniforms();
-                    saveConfig();
+                    updateMaterialUniforms(); saveConfig();
                 });
             });
-
             document.getElementById('ui-pcolor').addEventListener('input', e => {
                 config.shipColor = e.target.value;
-                ships.forEach(s => {
-                    s.mesh.material.color.set(config.shipColor);
-                    s.light.color.set(config.shipColor);
-                    s.orbitLine.material.color.set(config.shipColor);
-                    s.trailLine.material.color.set(config.shipColor);
-                });
+                updateShipColor(config.shipColor);
                 saveConfig();
             });
             document.getElementById('ui-sstyle').addEventListener('change', e => {
@@ -691,11 +832,8 @@
                 ships.forEach(s => { s.mesh.material.wireframe = (config.shipStyle === 0); });
                 saveConfig();
             });
-            document.getElementById('ui-gravity-color').addEventListener('input', e => {
-                config.gravityColor = e.target.value;
-                updateGravityLines();
-                saveConfig();
-            });
+            document.getElementById('ui-gravity-color').addEventListener('input', e => { config.gravityColor = e.target.value; updateGravityLines(); saveConfig(); });
+            document.getElementById('meteor-color').addEventListener('input', e => { config.meteorColor = e.target.value; saveConfig(); });
         }
 
         function init3D() {
@@ -760,7 +898,7 @@
         }
 
         function initSpaceships() {
-            ships.forEach(s => { scene.remove(s.orbitGroup); scene.remove(s.shadow); scene.remove(s.trailLine); });
+            ships.forEach(s => { scene.remove(s.orbitGroup); scene.remove(s.shadow); scene.remove(s.trailLine); if(s.lockLine) scene.remove(s.lockLine); });
             gravityLines.forEach(l => scene.remove(l));
             ships = []; gravityLines = [];
             const geo = new THREE.ConeGeometry(0.04, 0.16, 4); geo.rotateX(Math.PI/2);
@@ -768,7 +906,7 @@
                 let orbitGroup = new THREE.Group(); scene.add(orbitGroup);
                 let pivot = new THREE.Group(); orbitGroup.add(pivot);
                 let container = new THREE.Group(); pivot.add(container);
-                let mat = new THREE.MeshBasicMaterial({ color: config.shipColor, wireframe: config.shipStyle===0 });
+                let mat = new THREE.MeshStandardMaterial({ color: config.shipColor, emissive: config.shipColor, wireframe: config.shipStyle===0 });
                 let mesh = new THREE.Mesh(geo, mat); container.add(mesh);
                 let light = new THREE.PointLight(config.shipColor, 1.5, 3.0); container.add(light);
                 container.scale.set(config.shipSize, config.shipSize, config.shipSize);
@@ -780,9 +918,14 @@
                 scene.add(shadow);
                 let gLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color: config.gravityColor, dashSize:0.03, gapSize:0.02 }));
                 gLine.visible = config.gravityEnabled; scene.add(gLine); gravityLines.push(gLine);
-                ships.push({ orbitGroup, pivot, container, mesh, light, shadow, orbitLine, trailLine, history:[], baseSpeed:0, gravityLine: gLine });
+                let lockLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color: config.shipColor, dashSize:0.04, gapSize:0.03 }));
+                lockLine.visible = false; scene.add(lockLine);
+                ships.push({ orbitGroup, pivot, container, mesh, light, shadow, orbitLine, trailLine, history:[], baseSpeed:0, gravityLine: gLine, lockLine, lockTarget: null });
             }
-            randomizeOrbits(); updateGravityLines();
+            randomizeOrbits(); 
+            updateGravityLines();
+            // 确保颜色同步
+            updateShipColor(config.shipColor);
         }
 
         function randomizeOrbits() {
@@ -814,12 +957,132 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            timeGlobal+=0.01; customMaterial.uniforms.time.value=timeGlobal;
+            timeGlobal += 0.01; 
+            const delta = 0.016;
+            
+            customMaterial.uniforms.time.value = timeGlobal;
             if(config.autoRotate && !isDragging) {
                 autoRotAxis.set(Math.sin(timeGlobal*0.15), Math.cos(timeGlobal*0.1), Math.sin(timeGlobal*0.05)).normalize();
                 terrainMesh.rotateOnAxis(autoRotAxis, 0.005*config.planetSpeed);
                 ships.forEach(s=>s.orbitGroup.rotateOnAxis(autoRotAxis, 0.005*config.planetSpeed));
             }
+
+            // 陨石生成
+            if (config.meteorEnabled) {
+                meteorSpawnAcc += delta * config.meteorDensity;
+                while (meteorSpawnAcc > 1.0) {
+                    spawnMeteor();
+                    meteorSpawnAcc -= 1.0;
+                }
+            }
+
+            const meteorsToRemove = new Set();
+            // 飞船锁定逻辑
+            ships.forEach(ship => {
+                const shipPos = new THREE.Vector3(); ship.container.getWorldPosition(shipPos);
+                let closestMeteor = null;
+                let minDist = Infinity;
+                meteors.forEach(m => {
+                    if (meteorsToRemove.has(m)) return;
+                    const dist = shipPos.distanceTo(m.position);
+                    if (dist < config.lockDistance && dist < minDist) {
+                        minDist = dist;
+                        closestMeteor = m;
+                    }
+                });
+                
+                if (closestMeteor) {
+                    if (ship.lockTarget === closestMeteor) {
+                        closestMeteor.userData.lockTimer += delta;
+                    } else {
+                        ship.lockTarget = closestMeteor;
+                        closestMeteor.userData.lockTimer = 0;
+                        closestMeteor.userData.lockedBy = ship;
+                    }
+                    if (config.showLockLine) {
+                        ship.lockLine.visible = true;
+                        ship.lockLine.material.color.set(config.shipColor);
+                        ship.lockLine.geometry.setFromPoints([shipPos, closestMeteor.position.clone()]);
+                        ship.lockLine.computeLineDistances();
+                    } else ship.lockLine.visible = false;
+                    
+                    if (closestMeteor.userData.lockTimer >= 1.0) {
+                        // 锁定爆炸
+                        addLockExplosion(closestMeteor.position.clone(), config.shipColor, closestMeteor.userData.size);
+                        meteorsToRemove.add(closestMeteor);
+                        ship.lockTarget = null;
+                        ship.lockLine.visible = false;
+                    }
+                } else {
+                    ship.lockTarget = null;
+                    ship.lockLine.visible = false;
+                }
+            });
+
+            // 陨石移动 & 撞击
+            meteors.forEach(m => {
+                if (meteorsToRemove.has(m)) return;
+                m.position.addScaledVector(m.userData.velocity, delta);
+                const dirToCenter = m.position.clone().normalize().negate();
+                raycaster.set(m.position, dirToCenter);
+                const hits = raycaster.intersectObject(terrainMesh);
+                if (hits.length && hits[0].distance < 0.8) {
+                    const hit = hits[0];
+                    addImpactFlash(hit.point, config.meteorColor, m.userData.size);
+                    meteorsToRemove.add(m);
+                    return;
+                }
+                if (m.position.length() > 20) meteorsToRemove.add(m);
+            });
+
+            // 移除陨石并解除锁定
+            meteorsToRemove.forEach(m => {
+                scene.remove(m);
+                const idx = meteors.indexOf(m);
+                if (idx !== -1) meteors.splice(idx, 1);
+                ships.forEach(s => { if (s.lockTarget === m) { s.lockTarget = null; s.lockLine.visible = false; } });
+            });
+
+            // 更新闪光 (撞击)
+            for (let i=impactFlashes.length-1; i>=0; i--) {
+                const f = impactFlashes[i];
+                f.life -= delta;
+                if (f.life <= 0) {
+                    scene.remove(f.mesh);
+                    impactFlashes.splice(i,1);
+                } else {
+                    const scale = 1 + (1 - f.life/f.maxLife) * 0.8;
+                    f.mesh.scale.setScalar(scale);
+                    f.mesh.material.opacity = f.life / f.maxLife;
+                }
+            }
+
+            // 更新锁定爆炸 (虚线扩散)
+            for (let i=lockExplosions.length-1; i>=0; i--) {
+                const exp = lockExplosions[i];
+                exp.progress += delta / exp.duration;
+                if (exp.progress >= 1.0) {
+                    scene.remove(exp.group);
+                    lockExplosions.splice(i,1);
+                    continue;
+                }
+                const r = exp.size * 0.5 + exp.size * 1.5 * exp.progress;
+                const opacity = 1.0 - exp.progress;
+                exp.rings.forEach(ring => {
+                    const points = [];
+                    for (let j=0; j<=32; j++) {
+                        const theta = (j/32)*Math.PI*2;
+                        points.push(new THREE.Vector3(Math.cos(theta)*r, Math.sin(theta)*r, 0));
+                    }
+                    ring.geometry.setFromPoints(points);
+                    ring.material.color.set(exp.color);
+                    ring.material.opacity = opacity;
+                    ring.material.transparent = true;
+                    ring.computeLineDistances();
+                });
+            }
+
+            // 飞船更新
             ships.forEach(s=>{
                 const old=new THREE.Vector3(); s.container.getWorldPosition(old);
                 s.pivot.rotateY(s.baseSpeed*config.shipSpeed*0.02);
@@ -834,6 +1097,7 @@
                 s.orbitLine.visible=config.showOrbitRing;
                 if(config.showTrail){ s.trailLine.visible=true; if(Math.abs(s.baseSpeed*config.shipSpeed*0.02)>0.001||isDragging){ s.history.push(neo.clone()); if(s.history.length>40)s.history.shift(); s.trailLine.geometry.setFromPoints(s.history); } } else s.trailLine.visible=false;
             });
+
             renderer.render(scene, camera);
         }
 
