@@ -13,7 +13,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>GENERATIVE LANDSCAPE CONSOLE / 生成式地形控制台</title>
     <style>
         @import url('https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Share+Tech+Mono&display=swap');
@@ -51,34 +51,51 @@
             cursor: crosshair;
         }
 
-        /* 右上角菜单按钮 */
+        /* 右上角菜单按钮 — 简化为三横线 (汉堡图标) */
         #btn-menu {
             position: absolute;
             top: 20px;
             right: 20px;
-            border: 1px solid var(--main);
-            color: var(--main);
+            width: 44px;
+            height: 44px;
+            border: 1.5px solid var(--main);
             background: rgba(5, 5, 5, 0.85);
-            padding: 8px 15px;
-            font-family: inherit;
-            font-size: 14px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
             z-index: 20;
-            letter-spacing: 1px;
             transition: all 0.2s;
-            box-shadow: 0 0 10px rgba(255, 85, 0, 0.2);
+            box-shadow: 0 0 12px rgba(255, 85, 0, 0.25);
+            backdrop-filter: blur(4px);
         }
-        #btn-menu:hover { background: var(--main); color: var(--bg); }
+        #btn-menu:hover {
+            background: var(--main);
+            box-shadow: 0 0 18px var(--main);
+        }
+        #btn-menu:hover .menu-line {
+            background: var(--bg);
+        }
+        .menu-line {
+            width: 22px;
+            height: 2px;
+            background: var(--main);
+            transition: 0.15s;
+            border-radius: 0;
+        }
 
         /* 右侧控制台面板 */
         #sidebar {
             position: absolute;
             top: 0; right: 0;
-            width: 360px;
+            width: 380px;
             height: 100vh;
             border-left: 1px solid var(--main);
-            background: rgba(5, 5, 5, 0.92);
-            padding: 60px 20px 20px 20px;
+            background: rgba(5, 5, 5, 0.94);
+            padding: 70px 20px 20px 20px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -87,56 +104,67 @@
             z-index: 15;
             transform: translateX(100%);
             transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(6px);
         }
 
         #sidebar.active { transform: translateX(0); }
 
         .panel {
             border: 1px solid var(--text-dim);
-            padding: 12px;
+            padding: 14px 12px 12px;
             position: relative;
+            background: rgba(10, 10, 10, 0.5);
         }
 
         .panel-title {
             position: absolute;
             top: -10px; left: 10px;
             background: var(--bg);
-            padding: 0 5px;
+            padding: 0 8px;
             font-size: 13px;
             font-weight: bold;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            color: var(--main);
+            text-shadow: 0 0 5px rgba(255,85,0,0.5);
         }
 
         .control-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
+            margin-top: 12px;
             font-size: 12px;
+            gap: 8px;
         }
 
-        .control-row.block { flex-direction: column; align-items: stretch; gap: 5px; }
+        .control-row.block { flex-direction: column; align-items: stretch; gap: 6px; }
 
-        .control-label { letter-spacing: 0.5px; display: flex; flex-direction: column; }
-        .control-label .cn { font-size: 10px; color: var(--text-dim); }
+        .control-label {
+            letter-spacing: 0.5px;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+            min-width: 100px;
+        }
+        .control-label .cn { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 
         .number-control {
             display: flex; align-items: center;
             border: 1px solid var(--main);
-            background: #111; height: 22px;
+            background: #0a0a0a; height: 28px;
         }
 
         .number-control input {
-            width: 45px; background: transparent; border: none;
+            width: 50px; background: transparent; border: none;
             color: var(--accent); text-align: center;
-            font-family: inherit; font-size: 12px; outline: none;
+            font-family: inherit; font-size: 13px; outline: none; font-weight: bold;
         }
 
         .btn-math {
-            width: 22px; height: 22px; background: transparent;
+            width: 28px; height: 28px; background: transparent;
             border: none; color: var(--main); cursor: pointer;
             display: flex; justify-content: center; align-items: center;
+            font-size: 18px; font-weight: bold;
         }
         .btn-math:first-child { border-right: 1px solid var(--text-dim); }
         .btn-math:last-child { border-left: 1px solid var(--text-dim); }
@@ -144,14 +172,15 @@
 
         .toggle-btn {
             background: transparent; border: 1px solid var(--main);
-            color: var(--main); padding: 2px 10px; cursor: pointer;
-            font-family: inherit; font-size: 12px; min-width: 50px; height: 24px;
+            color: var(--main); padding: 4px 12px; cursor: pointer;
+            font-family: inherit; font-size: 12px; min-width: 60px; height: 28px;
+            letter-spacing: 1px;
         }
         .toggle-btn.active { background: var(--main); color: var(--bg); }
 
         .action-btn {
             background: rgba(255, 85, 0, 0.1); border: 1px solid var(--main);
-            color: var(--main); padding: 6px 10px; cursor: pointer;
+            color: var(--main); padding: 8px 10px; cursor: pointer;
             font-family: inherit; font-size: 12px; font-weight: bold;
             transition: all 0.2s; text-align: center; letter-spacing: 1px;
         }
@@ -159,19 +188,30 @@
         .action-btn:active { transform: scale(0.98); }
 
         select {
-            background: #111; color: var(--accent); border: 1px solid var(--main);
-            font-family: inherit; font-size: 11px; padding: 2px 5px;
-            outline: none; cursor: pointer; width: 140px; height: 24px;
+            background: #0a0a0a; color: var(--accent); border: 1px solid var(--main);
+            font-family: inherit; font-size: 12px; padding: 4px 6px;
+            outline: none; cursor: pointer; width: 150px; height: 30px;
         }
 
         .color-picker {
-            width: 40px; height: 24px; border: 1px solid var(--main);
-            background: transparent; cursor: pointer; padding: 0;
+            width: 48px; height: 28px; border: 1px solid var(--main);
+            background: transparent; cursor: pointer; padding: 2px;
+        }
+        .color-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .color-group span {
+            font-size: 10px;
+            color: var(--text-dim);
+            width: 24px;
         }
 
         #scanlines {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 4px, 3px 100%;
             pointer-events: none; z-index: 5;
         }
@@ -180,16 +220,25 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--text-dim); }
         ::-webkit-scrollbar-thumb:hover { background: var(--main); }
+
+        /* 紧凑对齐 */
+        .inline-flex { display: flex; align-items: center; gap: 8px; }
+        .spacer { flex:1; }
     </style>
 </head>
 <body>
-
     <div id="main-container">
-        <button id="btn-menu">SYS. MENU</button>
+        <!-- 简化菜单按钮：三横线 -->
+        <button id="btn-menu">
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+        </button>
         <div id="scanlines"></div>
         <div id="canvas-container"></div>
         
         <div id="sidebar">
+            <!-- 地形参数面板 -->
             <div class="panel">
                 <div class="panel-title">TERRAIN 地形参数</div>
                 <div class="control-row">
@@ -208,6 +257,15 @@
                     <div class="control-label">GRID_RES<span class="cn">星球网格细分</span></div>
                     <div class="number-control" id="ctrl-res"></div>
                 </div>
+                <!-- 新增：线宽(示意) + 亮度 -->
+                <div class="control-row">
+                    <div class="control-label">LINE_W<span class="cn">网格线宽(视觉)</span></div>
+                    <div class="number-control" id="ctrl-linewidth"></div>
+                </div>
+                <div class="control-row">
+                    <div class="control-label">BRIGHT<span class="cn">地形亮度</span></div>
+                    <div class="number-control" id="ctrl-bright"></div>
+                </div>
                 <div class="control-row">
                     <div class="control-label">MODE<span class="cn">地貌渲染模式</span></div>
                     <select id="ui-mode">
@@ -219,8 +277,18 @@
                     <div class="control-label">T_COLOR<span class="cn">网格基础色</span></div>
                     <input type="color" id="ui-color" class="color-picker" value="#0088ff">
                 </div>
+                <!-- 热力图自定义颜色 -->
+                <div class="control-row block">
+                    <div class="control-label">HEAT GRADIENT<span class="cn">热力渐变色 (低/中/高)</span></div>
+                    <div class="color-group">
+                        <span>LOW</span><input type="color" id="heat-low" class="color-picker" value="#0033cc">
+                        <span>MID</span><input type="color" id="heat-mid" class="color-picker" value="#33cc33">
+                        <span>HIGH</span><input type="color" id="heat-high" class="color-picker" value="#ff5500">
+                    </div>
+                </div>
             </div>
 
+            <!-- 运动控制 -->
             <div class="panel">
                 <div class="panel-title">SYSTEM 运动控制</div>
                 <div class="control-row">
@@ -233,6 +301,7 @@
                 </div>
             </div>
 
+            <!-- 舰队系统 -->
             <div class="panel">
                 <div class="panel-title">FLEET 飞船舰队系统</div>
                 <div class="control-row">
@@ -280,443 +349,427 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // --- 简单版 3D Simplex Noise 实现 ---
-        const SimplexNoise = function() {
-            var F3 = 1.0/3.0, G3 = 1.0/6.0;
-            var p = new Uint8Array(256);
-            for (var i=0; i<256; i++) p[i] = Math.floor(Math.random()*256);
-            var perm = new Uint8Array(512), permMod12 = new Uint8Array(512);
-            for (var i=0; i<512; i++) { perm[i] = p[i & 255]; permMod12[i] = (perm[i] % 12); }
-            return {
-                noise3D: function(x, y, z) {
-                    var s = (x+y+z)*F3; var i = Math.floor(x+s), j = Math.floor(y+s), k = Math.floor(z+s);
-                    var t = (i+j+k)*G3; var X0 = i-t, Y0 = j-t, Z0 = k-t;
-                    var x0 = x-X0, y0 = y-Y0, z0 = z-Z0;
-                    var i1, j1, k1, i2, j2, k2;
-                    if(x0>=y0) {
-                        if(y0>=z0) { i1=1; j1=0; k1=0; i2=1; j2=1; k2=0; } else if(x0>=z0) { i1=1; j1=0; k1=0; i2=1; j2=0; k2=1; } else { i1=0; j1=0; k1=1; i2=1; j2=0; k2=1; }
-                    } else {
-                        if(y0<z0) { i1=0; j1=0; k1=1; i2=0; j2=1; k2=1; } else if(x0<z0) { i1=0; j1=1; k1=0; i2=0; j2=1; k2=1; } else { i1=0; j1=1; k1=0; i2=1; j2=1; k2=0; }
-                    }
-                    var x1 = x0 - i1 + G3, y1 = y0 - j1 + G3, z1 = z0 - k1 + G3;
-                    var x2 = x0 - i2 + 2.0*G3, y2 = y0 - j2 + 2.0*G3, z2 = z0 - k2 + 2.0*G3;
-                    var x3 = x0 - 1.0 + 3.0*G3, y3 = y0 - 1.0 + 3.0*G3, z3 = z0 - 1.0 + 3.0*G3;
-                    var ii = i & 255, jj = j & 255, kk = k & 255;
-                    var t0 = 0.6 - x0*x0 - y0*y0 - z0*z0; var n0 = t0<0 ? 0.0 : Math.pow(t0,4) * dot(permMod12[ii+perm[jj+perm[kk]]], x0, y0, z0);
-                    var t1 = 0.6 - x1*x1 - y1*y1 - z1*z1; var n1 = t1<0 ? 0.0 : Math.pow(t1,4) * dot(permMod12[ii+i1+perm[jj+j1+perm[kk+k1]]], x1, y1, z1);
-                    var t2 = 0.6 - x2*x2 - y2*y2 - z2*z2; var n2 = t2<0 ? 0.0 : Math.pow(t2,4) * dot(permMod12[ii+i2+perm[jj+j2+perm[kk+k2]]], x2, y2, z2);
-                    var t3 = 0.6 - x3*x3 - y3*y3 - z3*z3; var n3 = t3<0 ? 0.0 : Math.pow(t3,4) * dot(permMod12[ii+1+perm[jj+1+perm[kk+1]]], x3, y3, z3);
-                    return 32.0 * (n0 + n1 + n2 + n3);
-                }
-            };
-            function dot(g, x, y, z) {
-                var grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
-                return grad3[g][0]*x + grad3[g][1]*y + grad3[g][2]*z;
-            }
-        }();
-
-        // --- 全局默认配置 ---
-        const config = {
-            sphereRadius: 2.5,
-            noiseScale: 1.2,
-            amplitude: 0.6,
-            gridRes: 35, 
-            mode: 0,
-            baseColor: '#0088ff',
-            autoRotate: true,
-            planetSpeed: 0.5,
-            
-            shipCount: 3,
-            shipSpeed: 1.0,
-            hoverHeight: 0.3,
-            trailMode: 3, // 0: None, 1: Trail, 2: Orbit, 3: Full
-            shipSize: 1.0,
-            shipColor: '#ff2200',
-            shipStyle: 0 
-        };
-
-        const LOCAL_STORAGE_KEY = 'terrain_console_config_v4';
-
-        function loadConfig() {
-            const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (saved) {
-                try { Object.assign(config, JSON.parse(saved)); } catch(e) {}
-            }
-        }
-        function saveConfig() { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config)); }
-
-        let scene, camera, renderer, raycaster;
-        let terrainMesh, customMaterial;
-        let ships = []; 
-        
-        let isDragging = false;
-        let dragDistance = 0; 
-        let previousMousePosition = { x: 0, y: 0 };
-        let autoRotAxis = new THREE.Vector3(1, 1, 0).normalize();
-        let timeGlobal = 0;
-
-        // --- UI 控制初始化 ---
-        function createNumberControl(id, value, min, max, step, onChange) {
-            const container = document.getElementById(id);
-            container.innerHTML = `
-                <button class="btn-math minus">-</button>
-                <input type="text" value="${value.toFixed(step < 1 ? 2 : 0)}" readonly>
-                <button class="btn-math plus">+</button>
-            `;
-            const input = container.querySelector('input');
-            const updateVal = (newVal) => {
-                newVal = Math.max(min, Math.min(max, newVal));
-                input.value = newVal.toFixed(step < 1 ? 2 : 0);
-                onChange(newVal);
-            };
-            container.querySelector('.minus').addEventListener('click', () => updateVal(parseFloat(input.value) - step));
-            container.querySelector('.plus').addEventListener('click', () => updateVal(parseFloat(input.value) + step));
-        }
-
-        function initUI() {
-            document.getElementById('ui-mode').value = config.mode;
-            document.getElementById('ui-tmode').value = config.trailMode;
-            document.getElementById('ui-color').value = config.baseColor;
-            document.getElementById('ui-pcolor').value = config.shipColor;
-            document.getElementById('ui-sstyle').value = config.shipStyle;
-
-            const updateAutoBtn = () => {
-                const btnAuto = document.getElementById('ui-auto');
-                btnAuto.className = config.autoRotate ? 'toggle-btn active' : 'toggle-btn';
-                btnAuto.innerText = config.autoRotate ? 'ON' : 'OFF';
-            };
-            updateAutoBtn();
-
-            const sidebar = document.getElementById('sidebar');
-            const btnMenu = document.getElementById('btn-menu');
-            btnMenu.addEventListener('click', () => sidebar.classList.toggle('active'));
-
-            createNumberControl('ctrl-rad', config.sphereRadius, 1.0, 5.0, 0.5, v => { config.sphereRadius = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
-            createNumberControl('ctrl-noise', config.noiseScale, 0.1, 5.0, 0.1, v => { config.noiseScale = v; generateTerrain(); saveConfig(); });
-            createNumberControl('ctrl-amp', config.amplitude, 0.1, 2.0, 0.1, v => { config.amplitude = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
-            createNumberControl('ctrl-res', config.gridRes, 5, 80, 5, v => { config.gridRes = v; generateTerrain(); saveConfig(); });
-            
-            createNumberControl('ctrl-pspeed', config.planetSpeed, 0.0, 3.0, 0.1, v => { config.planetSpeed = v; saveConfig(); });
-            
-            createNumberControl('ctrl-scount', config.shipCount, 1, 5, 1, v => { config.shipCount = v; initSpaceships(); saveConfig(); });
-            createNumberControl('ctrl-sspeed', config.shipSpeed, 0.0, 3.0, 0.1, v => { config.shipSpeed = v; saveConfig(); });
-            createNumberControl('ctrl-hover', config.hoverHeight, 0.1, 2.0, 0.1, v => { config.hoverHeight = v; randomizeOrbits(); saveConfig(); });
-            createNumberControl('ctrl-ssize', config.shipSize, 0.2, 3.0, 0.1, v => { config.shipSize = v; ships.forEach(s => s.container.scale.set(v,v,v)); saveConfig(); });
-
-            document.getElementById('btn-rand-orbits').addEventListener('click', () => { randomizeOrbits(); saveConfig(); });
-            document.getElementById('ui-auto').addEventListener('click', () => { config.autoRotate = !config.autoRotate; updateAutoBtn(); saveConfig(); });
-            document.getElementById('ui-mode').addEventListener('change', (e) => { config.mode = parseInt(e.target.value); applyDisplayMode(); saveConfig(); });
-            document.getElementById('ui-tmode').addEventListener('change', (e) => { config.trailMode = parseInt(e.target.value); saveConfig(); });
-            document.getElementById('ui-color').addEventListener('input', (e) => { config.baseColor = e.target.value; updateMaterial(); saveConfig(); });
-            
-            document.getElementById('ui-pcolor').addEventListener('input', (e) => {
-                config.shipColor = e.target.value;
-                ships.forEach(s => {
-                    s.mesh.material.color.set(config.shipColor);
-                    s.light.color.set(config.shipColor);
-                    s.orbitLine.material.color.set(config.shipColor);
-                    s.trailLine.material.color.set(config.shipColor);
-                });
-                saveConfig();
-            });
-
-            document.getElementById('ui-sstyle').addEventListener('change', (e) => {
-                config.shipStyle = parseInt(e.target.value);
-                ships.forEach(s => { s.mesh.material.wireframe = (config.shipStyle === 0); });
-                saveConfig();
-            });
-        }
-
-        // --- 3D 核心逻辑 ---
-        function init3D() {
-            const container = document.getElementById('canvas-container');
-            
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 2.5, 10.5);
-            camera.lookAt(0, 0, 0);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
-
-            raycaster = new THREE.Raycaster();
-
-            customMaterial = new THREE.ShaderMaterial({
-                uniforms: {
-                    baseColor: { value: new THREE.Color(config.baseColor) },
-                    displayMode: { value: config.mode },
-                    baseRadius: { value: config.sphereRadius },
-                    time: { value: 0 }
-                },
-                vertexShader: `
-                    uniform float baseRadius;
-                    varying float vElevation;
-                    void main() {
-                        vElevation = length(position) - baseRadius; 
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    }
-                `,
-                fragmentShader: `
-                    uniform vec3 baseColor;
-                    uniform int displayMode;
-                    varying float vElevation;
-                    
-                    void main() {
-                        vec3 finalColor = baseColor;
-                        if (displayMode == 0) { 
-                            finalColor = baseColor * 0.5 + (vElevation * 0.6);
-                        } else if (displayMode == 1) { 
-                            float h = clamp(vElevation * 1.5 + 0.2, 0.0, 1.0);
-                            vec3 colCold = vec3(0.0, 0.2, 0.8);
-                            vec3 colMid = vec3(0.2, 0.8, 0.2);
-                            vec3 colHot = vec3(1.0, 0.3, 0.0);
-                            if (h < 0.5) finalColor = mix(colCold, colMid, h * 2.0);
-                            else finalColor = mix(colMid, colHot, (h - 0.5) * 2.0);
+        (function(){
+            // --- Simplex Noise (保持原样) ---
+            const SimplexNoise = function() {
+                var F3 = 1.0/3.0, G3 = 1.0/6.0;
+                var p = new Uint8Array(256);
+                for (var i=0; i<256; i++) p[i] = Math.floor(Math.random()*256);
+                var perm = new Uint8Array(512), permMod12 = new Uint8Array(512);
+                for (var i=0; i<512; i++) { perm[i] = p[i & 255]; permMod12[i] = (perm[i] % 12); }
+                return {
+                    noise3D: function(x, y, z) {
+                        var s = (x+y+z)*F3; var i = Math.floor(x+s), j = Math.floor(y+s), k = Math.floor(z+s);
+                        var t = (i+j+k)*G3; var X0 = i-t, Y0 = j-t, Z0 = k-t;
+                        var x0 = x-X0, y0 = y-Y0, z0 = z-Z0;
+                        var i1, j1, k1, i2, j2, k2;
+                        if(x0>=y0) {
+                            if(y0>=z0) { i1=1; j1=0; k1=0; i2=1; j2=1; k2=0; } else if(x0>=z0) { i1=1; j1=0; k1=0; i2=1; j2=0; k2=1; } else { i1=0; j1=0; k1=1; i2=1; j2=0; k2=1; }
+                        } else {
+                            if(y0<z0) { i1=0; j1=0; k1=1; i2=0; j2=1; k2=1; } else if(x0<z0) { i1=0; j1=1; k1=0; i2=0; j2=1; k2=1; } else { i1=0; j1=1; k1=0; i2=1; j2=1; k2=0; }
                         }
-                        
-                        float depth = gl_FragCoord.z / gl_FragCoord.w;
-                        float fogFactor = smoothstep(6.0, 13.0, depth);
-                        finalColor = mix(finalColor, vec3(0.0), fogFactor);
-
-                        gl_FragColor = vec4(finalColor, 1.0);
+                        var x1 = x0 - i1 + G3, y1 = y0 - j1 + G3, z1 = z0 - k1 + G3;
+                        var x2 = x0 - i2 + 2.0*G3, y2 = y0 - j2 + 2.0*G3, z2 = z0 - k2 + 2.0*G3;
+                        var x3 = x0 - 1.0 + 3.0*G3, y3 = y0 - 1.0 + 3.0*G3, z3 = z0 - 1.0 + 3.0*G3;
+                        var ii = i & 255, jj = j & 255, kk = k & 255;
+                        var t0 = 0.6 - x0*x0 - y0*y0 - z0*z0; var n0 = t0<0 ? 0.0 : Math.pow(t0,4) * dot(permMod12[ii+perm[jj+perm[kk]]], x0, y0, z0);
+                        var t1 = 0.6 - x1*x1 - y1*y1 - z1*z1; var n1 = t1<0 ? 0.0 : Math.pow(t1,4) * dot(permMod12[ii+i1+perm[jj+j1+perm[kk+k1]]], x1, y1, z1);
+                        var t2 = 0.6 - x2*x2 - y2*y2 - z2*z2; var n2 = t2<0 ? 0.0 : Math.pow(t2,4) * dot(permMod12[ii+i2+perm[jj+j2+perm[kk+k2]]], x2, y2, z2);
+                        var t3 = 0.6 - x3*x3 - y3*y3 - z3*z3; var n3 = t3<0 ? 0.0 : Math.pow(t3,4) * dot(permMod12[ii+1+perm[jj+1+perm[kk+1]]], x3, y3, z3);
+                        return 32.0 * (n0 + n1 + n2 + n3);
                     }
-                `,
-                wireframe: true, transparent: true
-            });
+                };
+                function dot(g, x, y, z) {
+                    var grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+                    return grad3[g][0]*x + grad3[g][1]*y + grad3[g][2]*z;
+                }
+            }();
 
-            terrainMesh = new THREE.Mesh(new THREE.BufferGeometry(), customMaterial);
-            scene.add(terrainMesh);
+            // --- 扩展配置：增加线宽(视觉)、亮度、热力图三色 ---
+            const config = {
+                sphereRadius: 2.5,
+                noiseScale: 1.2,
+                amplitude: 0.6,
+                gridRes: 35, 
+                mode: 0,
+                baseColor: '#0088ff',
+                lineWidth: 1.0,        // 仅示意
+                brightness: 1.0,
+                heatLow: '#0033cc',
+                heatMid: '#33cc33',
+                heatHigh: '#ff5500',
+                autoRotate: true,
+                planetSpeed: 0.5,
+                shipCount: 3,
+                shipSpeed: 1.0,
+                hoverHeight: 0.3,
+                trailMode: 3,
+                shipSize: 1.0,
+                shipColor: '#ff2200',
+                shipStyle: 0 
+            };
 
-            generateTerrain();
-            applyDisplayMode();
-            initSpaceships();
-            setupInteractions(container);
-            window.addEventListener('resize', onWindowResize);
-        }
+            const LOCAL_STORAGE_KEY = 'terrain_console_config_v5';
 
-        // --- 舰队与轨道管理逻辑 ---
-        function initSpaceships() {
-            ships.forEach(s => {
-                scene.remove(s.orbitGroup);
-                scene.remove(s.shadow);
-                scene.remove(s.trailLine);
-            });
-            ships = [];
+            function loadConfig() {
+                const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (saved) {
+                    try { Object.assign(config, JSON.parse(saved)); } catch(e) {}
+                }
+            }
+            function saveConfig() { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config)); }
 
-            // 构造四棱锥星际战机 (4个侧面，对称性好)
-            const shipGeo = new THREE.ConeGeometry(0.04, 0.16, 4);
-            // 默认 Cone: Tip在+Y，Base在-Y
-            shipGeo.rotateX(Math.PI / 2); // 旋转后：Tip在-Z(Forward)，四面分别朝向上下左右
+            let scene, camera, renderer, raycaster;
+            let terrainMesh, customMaterial;
+            let ships = []; 
+            let isDragging = false;
+            let dragDistance = 0; 
+            let previousMousePosition = { x: 0, y: 0 };
+            let autoRotAxis = new THREE.Vector3(1, 1, 0).normalize();
+            let timeGlobal = 0;
 
-            for(let i=0; i<config.shipCount; i++) {
-                let orbitGroup = new THREE.Group();
-                scene.add(orbitGroup);
+            // --- UI 控件生成 ---
+            function createNumberControl(id, value, min, max, step, onChange) {
+                const container = document.getElementById(id);
+                container.innerHTML = `
+                    <button class="btn-math minus">-</button>
+                    <input type="text" value="${value.toFixed(step < 1 ? 2 : 0)}" readonly>
+                    <button class="btn-math plus">+</button>
+                `;
+                const input = container.querySelector('input');
+                const updateVal = (newVal) => {
+                    newVal = Math.max(min, Math.min(max, newVal));
+                    input.value = newVal.toFixed(step < 1 ? 2 : 0);
+                    onChange(newVal);
+                };
+                container.querySelector('.minus').addEventListener('click', () => updateVal(parseFloat(input.value) - step));
+                container.querySelector('.plus').addEventListener('click', () => updateVal(parseFloat(input.value) + step));
+            }
 
-                let pivot = new THREE.Group();
-                orbitGroup.add(pivot);
+            // 更新材质uniforms (颜色、亮度、热力色等)
+            function updateMaterialUniforms() {
+                if (!customMaterial) return;
+                customMaterial.uniforms.baseColor.value.set(config.baseColor);
+                customMaterial.uniforms.brightness.value = config.brightness;
+                customMaterial.uniforms.heatLow.value.set(config.heatLow);
+                customMaterial.uniforms.heatMid.value.set(config.heatMid);
+                customMaterial.uniforms.heatHigh.value.set(config.heatHigh);
+                customMaterial.uniforms.displayMode.value = config.mode;
+                customMaterial.wireframe = (config.mode === 0);
+            }
 
-                let container = new THREE.Group();
-                pivot.add(container);
+            function initUI() {
+                document.getElementById('ui-mode').value = config.mode;
+                document.getElementById('ui-tmode').value = config.trailMode;
+                document.getElementById('ui-color').value = config.baseColor;
+                document.getElementById('ui-pcolor').value = config.shipColor;
+                document.getElementById('ui-sstyle').value = config.shipStyle;
+                document.getElementById('heat-low').value = config.heatLow;
+                document.getElementById('heat-mid').value = config.heatMid;
+                document.getElementById('heat-high').value = config.heatHigh;
 
-                let shipMat = new THREE.MeshBasicMaterial({ color: config.shipColor, wireframe: config.shipStyle === 0 });
-                let shipMesh = new THREE.Mesh(shipGeo, shipMat);
-                container.add(shipMesh);
+                const updateAutoBtn = () => {
+                    const btnAuto = document.getElementById('ui-auto');
+                    btnAuto.className = config.autoRotate ? 'toggle-btn active' : 'toggle-btn';
+                    btnAuto.innerText = config.autoRotate ? 'ON' : 'OFF';
+                };
+                updateAutoBtn();
 
-                let shipLight = new THREE.PointLight(config.shipColor, 1.5, 3.0);
-                shipLight.position.set(0, 0, 0);
-                container.add(shipLight);
+                const sidebar = document.getElementById('sidebar');
+                const btnMenu = document.getElementById('btn-menu');
+                btnMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('active');
+                });
+
+                // 地形参数
+                createNumberControl('ctrl-rad', config.sphereRadius, 1.0, 5.0, 0.5, v => { config.sphereRadius = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
+                createNumberControl('ctrl-noise', config.noiseScale, 0.1, 5.0, 0.1, v => { config.noiseScale = v; generateTerrain(); saveConfig(); });
+                createNumberControl('ctrl-amp', config.amplitude, 0.1, 2.0, 0.1, v => { config.amplitude = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
+                createNumberControl('ctrl-res', config.gridRes, 5, 80, 5, v => { config.gridRes = v; generateTerrain(); saveConfig(); });
+                createNumberControl('ctrl-linewidth', config.lineWidth, 0.5, 5.0, 0.1, v => { config.lineWidth = v; /* 示意性 */ saveConfig(); });
+                createNumberControl('ctrl-bright', config.brightness, 0.2, 2.5, 0.1, v => { config.brightness = v; updateMaterialUniforms(); saveConfig(); });
                 
-                container.scale.set(config.shipSize, config.shipSize, config.shipSize);
+                createNumberControl('ctrl-pspeed', config.planetSpeed, 0.0, 3.0, 0.1, v => { config.planetSpeed = v; saveConfig(); });
+                createNumberControl('ctrl-scount', config.shipCount, 1, 5, 1, v => { config.shipCount = v; initSpaceships(); saveConfig(); });
+                createNumberControl('ctrl-sspeed', config.shipSpeed, 0.0, 3.0, 0.1, v => { config.shipSpeed = v; saveConfig(); });
+                createNumberControl('ctrl-hover', config.hoverHeight, 0.1, 2.0, 0.1, v => { config.hoverHeight = v; randomizeOrbits(); saveConfig(); });
+                createNumberControl('ctrl-ssize', config.shipSize, 0.2, 3.0, 0.1, v => { config.shipSize = v; ships.forEach(s => s.container.scale.set(v,v,v)); saveConfig(); });
 
-                // 全景轨道线
-                const orbitLineMat = new THREE.LineBasicMaterial({ color: config.shipColor, transparent: true, opacity: 0.15 });
-                const orbitLine = new THREE.Line(new THREE.BufferGeometry(), orbitLineMat);
-                orbitGroup.add(orbitLine);
+                document.getElementById('btn-rand-orbits').addEventListener('click', () => { randomizeOrbits(); saveConfig(); });
+                document.getElementById('ui-auto').addEventListener('click', () => { config.autoRotate = !config.autoRotate; updateAutoBtn(); saveConfig(); });
+                
+                document.getElementById('ui-mode').addEventListener('change', (e) => { 
+                    config.mode = parseInt(e.target.value); 
+                    updateMaterialUniforms(); 
+                    saveConfig(); 
+                });
+                document.getElementById('ui-tmode').addEventListener('change', (e) => { config.trailMode = parseInt(e.target.value); saveConfig(); });
+                
+                document.getElementById('ui-color').addEventListener('input', (e) => { 
+                    config.baseColor = e.target.value; 
+                    updateMaterialUniforms(); 
+                    saveConfig(); 
+                });
+                
+                // 热力图颜色
+                ['heat-low','heat-mid','heat-high'].forEach((id, idx) => {
+                    document.getElementById(id).addEventListener('input', (e) => {
+                        if(idx===0) config.heatLow = e.target.value;
+                        else if(idx===1) config.heatMid = e.target.value;
+                        else config.heatHigh = e.target.value;
+                        updateMaterialUniforms();
+                        saveConfig();
+                    });
+                });
 
-                // 动态尾迹
-                const trailMat = new THREE.LineBasicMaterial({ color: config.shipColor, transparent: true, opacity: 0.8 });
-                const trailLine = new THREE.Line(new THREE.BufferGeometry(), trailMat);
-                scene.add(trailLine);
-
-                // 悬浮阴影
-                const shadowGeo = new THREE.CircleGeometry(0.08, 16);
-                const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.6, depthWrite: false });
-                let shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
-                scene.add(shadowMesh);
-
-                ships.push({
-                    orbitGroup: orbitGroup,
-                    pivot: pivot,
-                    container: container,
-                    mesh: shipMesh,
-                    light: shipLight,
-                    shadow: shadowMesh,
-                    orbitLine: orbitLine,
-                    trailLine: trailLine,
-                    history: [],
-                    baseSpeed: 0
+                document.getElementById('ui-pcolor').addEventListener('input', (e) => {
+                    config.shipColor = e.target.value;
+                    ships.forEach(s => {
+                        s.mesh.material.color.set(config.shipColor);
+                        s.light.color.set(config.shipColor);
+                        s.orbitLine.material.color.set(config.shipColor);
+                        s.trailLine.material.color.set(config.shipColor);
+                    });
+                    saveConfig();
+                });
+                document.getElementById('ui-sstyle').addEventListener('change', (e) => {
+                    config.shipStyle = parseInt(e.target.value);
+                    ships.forEach(s => { s.mesh.material.wireframe = (config.shipStyle === 0); });
+                    saveConfig();
                 });
             }
-            randomizeOrbits();
-        }
 
-        function randomizeOrbits() {
-            const maxPlanetRadius = config.sphereRadius + config.amplitude;
+            // --- 初始化3D场景 ---
+            function init3D() {
+                const container = document.getElementById('canvas-container');
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+                camera.position.set(0, 2.5, 10.5);
+                camera.lookAt(0, 0, 0);
 
-            ships.forEach((ship, index) => {
-                const orbitRadius = maxPlanetRadius + config.hoverHeight + (index * 0.35) + (Math.random() * 0.1);
-                
-                // 轨道随机偏角
-                const inc = Math.random() * Math.PI;
-                const lan = Math.random() * Math.PI * 2;
-                ship.orbitGroup.rotation.set(inc, lan, 0, 'YXZ');
-                
-                ship.container.position.set(orbitRadius, 0, 0);
-                ship.baseSpeed = (Math.random() * 0.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                container.appendChild(renderer.domElement);
 
-                // 初始化轨道环几何
-                const orbitPoints = [];
-                for(let j=0; j<=64; j++) {
-                    const angle = (j / 64) * Math.PI * 2;
-                    orbitPoints.push(new THREE.Vector3(Math.cos(angle)*orbitRadius, 0, Math.sin(angle)*orbitRadius));
-                }
-                ship.orbitLine.geometry.setFromPoints(orbitPoints);
+                raycaster = new THREE.Raycaster();
 
-                // 清空尾迹
-                ship.history = [];
-                ship.trailLine.geometry.setFromPoints([new THREE.Vector3()]);
-            });
-        }
+                // 自定义着色器材质 (增加亮度、热力图三色)
+                customMaterial = new THREE.ShaderMaterial({
+                    uniforms: {
+                        baseColor: { value: new THREE.Color(config.baseColor) },
+                        displayMode: { value: config.mode },
+                        baseRadius: { value: config.sphereRadius },
+                        time: { value: 0 },
+                        brightness: { value: config.brightness },
+                        heatLow: { value: new THREE.Color(config.heatLow) },
+                        heatMid: { value: new THREE.Color(config.heatMid) },
+                        heatHigh: { value: new THREE.Color(config.heatHigh) }
+                    },
+                    vertexShader: `
+                        uniform float baseRadius;
+                        varying float vElevation;
+                        void main() {
+                            vElevation = length(position) - baseRadius; 
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform vec3 baseColor;
+                        uniform int displayMode;
+                        uniform float brightness;
+                        uniform vec3 heatLow;
+                        uniform vec3 heatMid;
+                        uniform vec3 heatHigh;
+                        varying float vElevation;
+                        
+                        void main() {
+                            vec3 finalColor = baseColor;
+                            if (displayMode == 0) { 
+                                finalColor = baseColor * (0.7 + vElevation * 0.5);
+                            } else if (displayMode == 1) { 
+                                float h = clamp(vElevation * 1.2 + 0.2, 0.0, 1.0);
+                                if (h < 0.5) finalColor = mix(heatLow, heatMid, h * 2.0);
+                                else finalColor = mix(heatMid, heatHigh, (h - 0.5) * 2.0);
+                            }
+                            finalColor *= brightness;
+                            
+                            float depth = gl_FragCoord.z / gl_FragCoord.w;
+                            float fogFactor = smoothstep(6.0, 13.0, depth);
+                            finalColor = mix(finalColor, vec3(0.0), fogFactor);
+                            gl_FragColor = vec4(finalColor, 1.0);
+                        }
+                    `,
+                    wireframe: true, 
+                    transparent: false,
+                    depthWrite: true,
+                    depthTest: true
+                });
 
-        // --- 地形生成 ---
-        function generateTerrain() {
-            const geometry = new THREE.IcosahedronGeometry(config.sphereRadius, config.gridRes);
-            const positions = geometry.attributes.position;
-            const vertex = new THREE.Vector3();
+                terrainMesh = new THREE.Mesh(new THREE.BufferGeometry(), customMaterial);
+                scene.add(terrainMesh);
 
-            for (let i = 0; i < positions.count; i++) {
-                vertex.fromBufferAttribute(positions, i);
-                const nx = vertex.x * config.noiseScale;
-                const ny = vertex.y * config.noiseScale;
-                const nz = vertex.z * config.noiseScale;
-                const noiseVal = SimplexNoise.noise3D(nx, ny, nz);
-                
-                vertex.normalize().multiplyScalar(config.sphereRadius + noiseVal * config.amplitude);
-                positions.setXYZ(i, vertex.x, vertex.y, vertex.z);
-            }
-            geometry.computeVertexNormals(); 
-
-            terrainMesh.geometry.dispose();
-            terrainMesh.geometry = geometry;
-            customMaterial.uniforms.baseRadius.value = config.sphereRadius;
-        }
-
-        function applyDisplayMode() {
-            customMaterial.uniforms.baseColor.value.set(config.baseColor);
-            customMaterial.uniforms.displayMode.value = config.mode;
-            customMaterial.wireframe = (config.mode === 0);
-        }
-
-        // --- 交互逻辑 ---
-        function setupInteractions(canvas) {
-            const onDown = (e) => {
-                isDragging = true; dragDistance = 0;
-                previousMousePosition = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
-            };
-            const onUp = (e) => { 
-                isDragging = false; 
-                if(dragDistance < 5 && e.target === canvas) {
-                    document.getElementById('sidebar').classList.toggle('active');
-                }
-            };
-            const onMove = (e) => {
-                if (!isDragging) return;
-                const currentX = e.clientX || e.touches[0].clientX;
-                const currentY = e.clientY || e.touches[0].clientY;
-                const deltaX = currentX - previousMousePosition.x;
-                const deltaY = currentY - previousMousePosition.y;
-                dragDistance += Math.abs(deltaX) + Math.abs(deltaY);
-
-                const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(deltaY * 0.005, deltaX * 0.005, 0, 'YXZ'));
-                terrainMesh.quaternion.multiplyQuaternions(q, terrainMesh.quaternion);
-                // 轨道网格跟随球体一起拖拽旋转
-                ships.forEach(s => s.orbitGroup.quaternion.multiplyQuaternions(q, s.orbitGroup.quaternion));
-
-                previousMousePosition = { x: currentX, y: currentY };
-            };
-
-            canvas.addEventListener('mousedown', onDown);
-            window.addEventListener('mouseup', onUp);
-            window.addEventListener('mousemove', onMove);
-            canvas.addEventListener('touchstart', onDown, {passive: false});
-            window.addEventListener('touchend', onUp);
-            window.addEventListener('touchmove', onMove, {passive: false});
-        }
-
-        function onWindowResize() {
-            const container = document.getElementById('canvas-container');
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        }
-
-        // --- 渲染与动画 ---
-        function animate() {
-            requestAnimationFrame(animate);
-            timeGlobal += 0.01;
-            customMaterial.uniforms.time.value = timeGlobal;
-
-            // 1. 星球全局自转
-            if (config.autoRotate && !isDragging) {
-                autoRotAxis.x = Math.sin(timeGlobal * 0.15);
-                autoRotAxis.y = Math.cos(timeGlobal * 0.1);
-                autoRotAxis.z = Math.sin(timeGlobal * 0.05);
-                autoRotAxis.normalize();
-                
-                const rotAngle = 0.005 * config.planetSpeed;
-                terrainMesh.rotateOnAxis(autoRotAxis, rotAngle);
-                ships.forEach(s => s.orbitGroup.rotateOnAxis(autoRotAxis, rotAngle));
+                generateTerrain();
+                updateMaterialUniforms();
+                initSpaceships();
+                setupInteractions(container);
+                window.addEventListener('resize', onWindowResize);
             }
 
-            const camPos = camera.position.clone();
-            const camDir = camPos.normalize();
+            function generateTerrain() {
+                const geometry = new THREE.IcosahedronGeometry(config.sphereRadius, config.gridRes);
+                const positions = geometry.attributes.position;
+                const vertex = new THREE.Vector3();
+                for (let i = 0; i < positions.count; i++) {
+                    vertex.fromBufferAttribute(positions, i);
+                    const nx = vertex.x * config.noiseScale;
+                    const ny = vertex.y * config.noiseScale;
+                    const nz = vertex.z * config.noiseScale;
+                    const noiseVal = SimplexNoise.noise3D(nx, ny, nz);
+                    vertex.normalize().multiplyScalar(config.sphereRadius + noiseVal * config.amplitude);
+                    positions.setXYZ(i, vertex.x, vertex.y, vertex.z);
+                }
+                geometry.computeVertexNormals();
+                terrainMesh.geometry.dispose();
+                terrainMesh.geometry = geometry;
+                customMaterial.uniforms.baseRadius.value = config.sphereRadius;
+            }
 
-            // 2. 舰队轨道运行、姿态与投影更新
-            ships.forEach(ship => {
-                // A. 记录当前位置
-                const oldPos = new THREE.Vector3();
-                ship.container.getWorldPosition(oldPos);
+            function initSpaceships() {
+                ships.forEach(s => {
+                    scene.remove(s.orbitGroup);
+                    scene.remove(s.shadow);
+                    scene.remove(s.trailLine);
+                });
+                ships = [];
+                const shipGeo = new THREE.ConeGeometry(0.04, 0.16, 4);
+                shipGeo.rotateX(Math.PI / 2);
+                for(let i=0; i<config.shipCount; i++) {
+                    let orbitGroup = new THREE.Group();
+                    scene.add(orbitGroup);
+                    let pivot = new THREE.Group();
+                    orbitGroup.add(pivot);
+                    let container = new THREE.Group();
+                    pivot.add(container);
+                    let shipMat = new THREE.MeshBasicMaterial({ color: config.shipColor, wireframe: config.shipStyle === 0, depthTest: true });
+                    let shipMesh = new THREE.Mesh(shipGeo, shipMat);
+                    container.add(shipMesh);
+                    let shipLight = new THREE.PointLight(config.shipColor, 1.5, 3.0);
+                    container.add(shipLight);
+                    container.scale.set(config.shipSize, config.shipSize, config.shipSize);
 
-                // B. 推进轨道
-                const stepAngle = ship.baseSpeed * config.shipSpeed * 0.02;
-                ship.pivot.rotateY(stepAngle);
+                    const orbitLineMat = new THREE.LineBasicMaterial({ color: config.shipColor, transparent: true, opacity: 0.2, depthTest: true });
+                    const orbitLine = new THREE.Line(new THREE.BufferGeometry(), orbitLineMat);
+                    orbitGroup.add(orbitLine);
 
-                // C. 获取新位置并计算姿态
-                const newPos = new THREE.Vector3();
-                ship.container.getWorldPosition(newPos);
+                    const trailMat = new THREE.LineBasicMaterial({ color: config.shipColor, transparent: true, opacity: 0.9, depthTest: true });
+                    const trailLine = new THREE.Line(new THREE.BufferGeometry(), trailMat);
+                    scene.add(trailLine);
 
-                const forward = newPos.clone().sub(oldPos).normalize();
-                const center = new THREE.Vector3(0,0,0);
-                const up = newPos.clone().sub(center).normalize();
-                const target = newPos.clone().add(forward);
+                    const shadowGeo = new THREE.CircleGeometry(0.08, 16);
+                    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5, depthWrite: true, depthTest: true });
+                    let shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+                    scene.add(shadowMesh);
 
-                // 飞船机头(-Z)指向前方，机腹(-Y)指向球心(所以Up是背离球心)
-                ship.container.up.copy(up);
-                ship.container.lookAt(target);
+                    ships.push({
+                        orbitGroup, pivot, container, mesh: shipMesh, light: shipLight,
+                        shadow: shadowMesh, orbitLine, trailLine,
+                        history: [], baseSpeed: 0
+                    });
+                }
+                randomizeOrbits();
+            }
 
-                // D. 视距与背面遮挡检测 (Backface Culling)
-                const shipDir = newPos.clone().normalize();
-                const distToCam = camera.position.length();
-                const horizonLimit = config.sphereRadius / distToCam;
-                
-                // 如果飞船相对于相机的夹角超过了星球的遮蔽地平线，则隐藏
-                const isVisible = shipDir.dot(camDir) > (horizonLimit - 0.1);
-                ship.container.visible = isVisible;
+            function randomizeOrbits() {
+                const maxPlanetRadius = config.sphereRadius + config.amplitude;
+                ships.forEach((ship, index) => {
+                    const orbitRadius = maxPlanetRadius + config.hoverHeight + (index * 0.35) + (Math.random() * 0.1);
+                    const inc = Math.random() * Math.PI;
+                    const lan = Math.random() * Math.PI * 2;
+                    ship.orbitGroup.rotation.set(inc, lan, 0, 'YXZ');
+                    ship.container.position.set(orbitRadius, 0, 0);
+                    ship.baseSpeed = (Math.random() * 0.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
+                    const orbitPoints = [];
+                    for(let j=0; j<=64; j++) {
+                        const angle = (j / 64) * Math.PI * 2;
+                        orbitPoints.push(new THREE.Vector3(Math.cos(angle)*orbitRadius, 0, Math.sin(angle)*orbitRadius));
+                    }
+                    ship.orbitLine.geometry.setFromPoints(orbitPoints);
+                    ship.history = [];
+                    ship.trailLine.geometry.setFromPoints([new THREE.Vector3()]);
+                });
+            }
 
-                // E. 悬浮投影系统
-                if (isVisible) {
+            function setupInteractions(canvas) {
+                const onDown = (e) => {
+                    isDragging = true; dragDistance = 0;
+                    const pos = e.touches ? e.touches[0] : e;
+                    previousMousePosition = { x: pos.clientX, y: pos.clientY };
+                };
+                const onUp = (e) => {
+                    if (isDragging && dragDistance < 5) {
+                        // 单击画面切换侧边栏
+                        document.getElementById('sidebar').classList.toggle('active');
+                    }
+                    isDragging = false;
+                };
+                const onMove = (e) => {
+                    if (!isDragging) return;
+                    const pos = e.touches ? e.touches[0] : e;
+                    const deltaX = pos.clientX - previousMousePosition.x;
+                    const deltaY = pos.clientY - previousMousePosition.y;
+                    dragDistance += Math.abs(deltaX) + Math.abs(deltaY);
+                    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(deltaY * 0.005, deltaX * 0.005, 0, 'YXZ'));
+                    terrainMesh.quaternion.multiplyQuaternions(q, terrainMesh.quaternion);
+                    ships.forEach(s => s.orbitGroup.quaternion.multiplyQuaternions(q, s.orbitGroup.quaternion));
+                    previousMousePosition = { x: pos.clientX, y: pos.clientY };
+                };
+                canvas.addEventListener('mousedown', onDown);
+                window.addEventListener('mouseup', onUp);
+                window.addEventListener('mousemove', onMove);
+                canvas.addEventListener('touchstart', onDown, {passive: false});
+                window.addEventListener('touchend', onUp);
+                window.addEventListener('touchmove', onMove, {passive: false});
+            }
+
+            function onWindowResize() {
+                const container = document.getElementById('canvas-container');
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                timeGlobal += 0.01;
+                customMaterial.uniforms.time.value = timeGlobal;
+
+                if (config.autoRotate && !isDragging) {
+                    autoRotAxis.x = Math.sin(timeGlobal * 0.15);
+                    autoRotAxis.y = Math.cos(timeGlobal * 0.1);
+                    autoRotAxis.z = Math.sin(timeGlobal * 0.05);
+                    autoRotAxis.normalize();
+                    const rotAngle = 0.005 * config.planetSpeed;
+                    terrainMesh.rotateOnAxis(autoRotAxis, rotAngle);
+                    ships.forEach(s => s.orbitGroup.rotateOnAxis(autoRotAxis, rotAngle));
+                }
+
+                // 飞船更新：移除背面剔除，依靠深度测试遮挡
+                ships.forEach(ship => {
+                    const oldPos = new THREE.Vector3();
+                    ship.container.getWorldPosition(oldPos);
+                    const stepAngle = ship.baseSpeed * config.shipSpeed * 0.02;
+                    ship.pivot.rotateY(stepAngle);
+                    const newPos = new THREE.Vector3();
+                    ship.container.getWorldPosition(newPos);
+                    
+                    const forward = newPos.clone().sub(oldPos).normalize();
+                    const up = newPos.clone().normalize();
+                    ship.container.up.copy(up);
+                    ship.container.lookAt(newPos.clone().add(forward));
+
+                    // 阴影投影
                     raycaster.set(newPos, up.clone().negate());
                     const intersects = raycaster.intersectObject(terrainMesh, false);
                     if (intersects.length > 0) {
@@ -729,35 +782,31 @@
                     } else {
                         ship.shadow.visible = false;
                     }
-                } else {
-                    ship.shadow.visible = false;
-                }
 
-                // F. 更新航迹与轨道显示
-                ship.orbitLine.visible = (config.trailMode === 2 || config.trailMode === 3);
-                
-                if (config.trailMode === 1 || config.trailMode === 3) {
-                    ship.trailLine.visible = true;
-                    // 只有当飞船在移动时才记录航迹
-                    if (Math.abs(stepAngle) > 0.001 || isDragging) {
-                        ship.history.push(newPos.clone());
-                        if (ship.history.length > 40) ship.history.shift();
-                        ship.trailLine.geometry.setFromPoints(ship.history);
+                    // 轨道环/航迹可见性
+                    ship.orbitLine.visible = (config.trailMode === 2 || config.trailMode === 3);
+                    if (config.trailMode === 1 || config.trailMode === 3) {
+                        ship.trailLine.visible = true;
+                        if (Math.abs(stepAngle) > 0.001 || isDragging) {
+                            ship.history.push(newPos.clone());
+                            if (ship.history.length > 40) ship.history.shift();
+                            ship.trailLine.geometry.setFromPoints(ship.history);
+                        }
+                    } else {
+                        ship.trailLine.visible = false;
                     }
-                } else {
-                    ship.trailLine.visible = false;
-                }
-            });
+                });
 
-            renderer.render(scene, camera);
-        }
+                renderer.render(scene, camera);
+            }
 
-        window.onload = () => {
-            loadConfig(); 
-            initUI();     
-            init3D();
-            animate();
-        };
+            window.onload = () => {
+                loadConfig(); 
+                initUI();     
+                init3D();
+                animate();
+            };
+        })();
     </script>
 </body>
 </html>
