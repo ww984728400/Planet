@@ -36,7 +36,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            touch-action: none;  /* 防止默认手势干扰，由canvas内部处理 */
+            touch-action: none;  
         }
 
         #main-container {
@@ -51,40 +51,73 @@
             flex: 1;
             position: relative;
             cursor: crosshair;
-            touch-action: none;  /* 禁止浏览器默认滚动/缩放 */
+            touch-action: none;  
         }
 
-        #btn-menu {
+        /* 顶部独立控制组 */
+        #top-controls {
             position: absolute;
             top: 20px;
             right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .icon-btn {
+            background: rgba(5, 5, 5, 0.85);
+            border: 1.5px solid #888888;
+            color: #888888;
             width: 44px;
             height: 44px;
-            border: 1.5px solid var(--main);
-            background: rgba(5, 5, 5, 0.85);
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
             cursor: pointer;
-            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
             transition: none;
-            box-shadow: 0 0 12px var(--ui-glow);
             backdrop-filter: blur(4px);
-            touch-action: manipulation;  /* 优化移动端点击 */
+            padding: 0;
+            box-shadow: 0 0 12px rgba(0,0,0,0.3);
+            touch-action: manipulation;
         }
-        #btn-menu:hover {
-            background: rgba(5, 5, 5, 0.85);
+
+        .icon-btn:hover {
+            border-color: var(--main);
+            color: var(--main);
             box-shadow: 0 0 12px var(--ui-glow);
         }
+
+        #btn-menu {
+            flex-direction: column;
+            gap: 6px;
+        }
+
         .menu-line {
             width: 22px;
             height: 2px;
-            background: var(--main);
+            background: #888888;
             transition: none;
             border-radius: 0;
+        }
+
+        #btn-menu:hover .menu-line {
+            background: var(--main);
+        }
+
+        #offline-screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #050505;
+            color: var(--main);
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(20px, 4vw, 40px);
+            font-weight: bold;
+            letter-spacing: 4px;
+            z-index: 100;
+            cursor: pointer;
         }
 
         #sidebar {
@@ -94,7 +127,7 @@
             height: 100vh;
             border-left: 1px solid var(--main);
             background: rgba(5, 5, 5, 0.94);
-            padding: 70px 22px 22px 22px;
+            padding: 85px 22px 22px 22px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -104,7 +137,7 @@
             transform: translateX(100%);
             transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
             backdrop-filter: blur(6px);
-            touch-action: pan-y;  /* 允许垂直滚动，但阻止水平手势 */
+            touch-action: pan-y;  
             -webkit-overflow-scrolling: touch;
         }
 
@@ -169,24 +202,30 @@
             gap: 8px;
             flex: 1;
         }
+        
         input[type="range"] {
             flex: 1;
+            height: 24px;
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            touch-action: none;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
             height: 4px;
             background: #151515;
             border: 1px solid var(--main);
-            border-radius: 0;
-            -webkit-appearance: none;
-            appearance: none;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 22px;
+            height: 22px;
             background: var(--main);
             border: 1.5px solid var(--main);
             border-radius: 0;
             cursor: pointer;
             box-shadow: 0 0 10px var(--main);
+            margin-top: -10px;
         }
         .slider-value {
             min-width: 52px;
@@ -200,7 +239,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* 滑块开关 (无文字) */
         .switch-container {
             display: flex;
             align-items: center;
@@ -210,7 +248,7 @@
             position: relative;
             display: inline-block;
             width: 48px;
-            height: 22px;
+            height: 24px;
             border: 1.5px solid var(--main);
             background: transparent;
             box-sizing: content-box;
@@ -225,10 +263,7 @@
         .slider-switch {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(10,10,10,0.8);
             transition: none;
             display: flex;
@@ -237,18 +272,22 @@
         }
         .slider-switch:before {
             content: "";
-            height: 16px;
-            width: 16px;
+            height: 18px;
+            width: 18px;
             background-color: var(--main);
             box-shadow: 0 0 8px var(--main);
             transition: transform 0.15s;
             transform: translateX(2px);
         }
         .switch input:checked + .slider-switch:before {
-            transform: translateX(28px);
+            transform: translateX(26px);
         }
         .switch input:checked + .slider-switch {
             background-color: rgba(30,30,30,0.9);
+        }
+
+        .action-btn, select, .color-picker {
+            min-height: 32px;
         }
 
         .action-btn {
@@ -279,7 +318,6 @@
             outline: none; 
             cursor: pointer; 
             width: 170px; 
-            height: 32px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -290,7 +328,6 @@
 
         .color-picker {
             width: 52px; 
-            height: 32px; 
             border: 1px solid var(--main);
             background: transparent; 
             cursor: pointer; 
@@ -334,17 +371,24 @@
     </style>
 </head>
 <body>
+
+<div id="offline-screen" title="Click to restart / 点击恢复运行">SYSTEM OFFLINE</div>
+
 <div id="main-container">
-    <button id="btn-menu">
-        <span class="menu-line"></span>
-        <span class="menu-line"></span>
-        <span class="menu-line"></span>
-    </button>
+    <div id="top-controls">
+        <button class="icon-btn" id="btn-menu" title="MENU / 菜单">
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+        </button>
+        <button class="icon-btn" id="btn-fullscreen" title="FULLSCREEN / 全屏">⛶</button>
+        <button class="icon-btn" id="btn-close" title="CLOSE / 关闭">✕</button>
+    </div>
+
     <div id="scanlines"></div>
     <div id="canvas-container"></div>
     
     <div id="sidebar">
-        <!-- 地形参数面板 -->
         <div class="panel">
             <div class="panel-title">TERRAIN 地形参数</div>
             <div class="control-row">
@@ -394,7 +438,6 @@
             </div>
         </div>
 
-        <!-- 运动控制面板 -->
         <div class="panel">
             <div class="panel-title">MOTION 运动控制</div>
             <div class="control-row">
@@ -407,7 +450,6 @@
             </div>
         </div>
 
-        <!-- 舰队系统面板 -->
         <div class="panel">
             <div class="panel-title">FLEET 飞船舰队</div>
             <div class="control-row">
@@ -466,7 +508,6 @@
             </div>
         </div>
 
-        <!-- 陨石系统面板 -->
         <div class="panel">
             <div class="panel-title">METEOR 陨石系统</div>
             <div class="control-row">
@@ -474,9 +515,30 @@
                 <div id="switch-meteor" class="switch-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">COLOR<span class="cn">陨石颜色</span></div>
+                <div class="control-label">COLOR<span class="cn">轮廓线颜色</span></div>
                 <input type="color" id="meteor-color" class="color-picker" value="#ccaa88">
             </div>
+            <div class="control-row">
+                <div class="control-label">DISPLAY MODE<span class="cn">显示模式</span></div>
+                <select id="ui-meteor-mode">
+                    <option value="0">EDGES 边线</option>
+                    <option value="1">SILHOUETTE 剪影</option>
+                    <option value="2">SOLID 实体色块</option>
+                </select>
+            </div>
+            <div class="control-row">
+                <div class="control-label">LOCK STYLE<span class="cn">锁定框样式</span></div>
+                <select id="ui-lock-style">
+                    <option value="0">CORNERS 边角框</option>
+                    <option value="1">CROSSHAIR 准星</option>
+                    <option value="2">RING 脉冲环</option>
+                </select>
+            </div>
+            <div class="control-row">
+                <div class="control-label">LOCK TIME<span class="cn">锁定爆炸时长</span></div>
+                <div id="ctrl-lock-dur" class="slider-container"></div>
+            </div>
+            <div class="divider"></div>
             <div class="control-row">
                 <div class="control-label">SPEED<span class="cn">飞行速度</span></div>
                 <div id="ctrl-meteor-speed" class="slider-container"></div>
@@ -493,7 +555,6 @@
                 <div class="control-label">LOCK DIST.<span class="cn">锁定距离</span></div>
                 <div id="ctrl-lock-dist" class="slider-container"></div>
             </div>
-            <div class="divider"></div>
             <div class="control-row">
                 <div class="control-label">LOCK INDICATOR<span class="cn">锁定连线</span></div>
                 <div id="switch-lock-line" class="switch-container"></div>
@@ -505,7 +566,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
     (function(){
-        // --- Simplex Noise (保持原样) ---
+        // --- Simplex Noise ---
         const SimplexNoise = function() {
             var F3 = 1.0/3.0, G3 = 1.0/6.0;
             var p = new Uint8Array(256);
@@ -540,7 +601,6 @@
             }
         }();
 
-        // 扩展配置
         const config = {
             sphereRadius: 2.5,
             noiseScale: 1.2,
@@ -570,16 +630,21 @@
             meteorColor: '#ccaa88',
             meteorSpeed: 0.8,
             meteorDensity: 1.2,
-            meteorSize: 0.65,
+            meteorSize: 0.3,
             lockDistance: 2.8,
             showLockLine: true,
+            meteorLockStyle: 0,
+            lockDuration: 1.0,
+            meteorDisplayMode: 1   // 0=边线, 1=剪影, 2=实体色块
         };
 
-        const LOCAL_STORAGE_KEY = 'terrain_console_config_v11';
+        const LOCAL_STORAGE_KEY = 'terrain_console_config_v15';
 
         function loadConfig() {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) { try { Object.assign(config, JSON.parse(saved)); } catch(e) {} }
+            if (config.meteorSize > 1.0) config.meteorSize = 0.3;
+            if (config.meteorDisplayMode === undefined) config.meteorDisplayMode = 1;
         }
         function saveConfig() { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config)); }
 
@@ -606,7 +671,210 @@
         let isTouchActive = false;
         let meteorSpawnAcc = 0;
 
-        // 工具：创建无辐条圆环
+        // 生成赛博朋克风锁定框贴图
+        const reticleCache = {};
+        function getReticleTexture(style, colorHex) {
+            const key = style + '_' + colorHex;
+            if (reticleCache[key]) return reticleCache[key];
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = colorHex;
+            ctx.lineWidth = 4;
+            const r = 40; const cx = 64; const cy = 64;
+            
+            if (style === 0) {
+                const l = 15;
+                ctx.beginPath();
+                ctx.moveTo(cx-r, cy-r+l); ctx.lineTo(cx-r, cy-r); ctx.lineTo(cx-r+l, cy-r);
+                ctx.moveTo(cx+r-l, cy-r); ctx.lineTo(cx+r, cy-r); ctx.lineTo(cx+r, cy-r+l);
+                ctx.moveTo(cx+r, cy+r-l); ctx.lineTo(cx+r, cy+r); ctx.lineTo(cx+r-l, cy+r);
+                ctx.moveTo(cx-r+l, cy+r); ctx.lineTo(cx-r, cy+r); ctx.lineTo(cx-r, cy+r-l);
+                ctx.stroke();
+            } else if (style === 1) {
+                ctx.beginPath();
+                ctx.arc(cx, cy, r*0.6, 0, Math.PI*2);
+                ctx.moveTo(cx-r*1.2, cy); ctx.lineTo(cx-r*0.2, cy);
+                ctx.moveTo(cx+r*1.2, cy); ctx.lineTo(cx+r*0.2, cy);
+                ctx.moveTo(cx, cy-r*1.2); ctx.lineTo(cx, cy-r*0.2);
+                ctx.moveTo(cx, cy+r*1.2); ctx.lineTo(cx, cy+r*0.2);
+                ctx.stroke();
+            } else {
+                ctx.setLineDash([8, 6]);
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.beginPath(); ctx.arc(cx, cy, r*0.4, 0, Math.PI*2); ctx.stroke();
+            }
+            
+            const tex = new THREE.CanvasTexture(canvas);
+            reticleCache[key] = tex;
+            return tex;
+        }
+
+        // ---------- 陨石生成：支持三种显示模式，锁定框放大 ----------
+        function createMeteorMesh(color, size) {
+            const group = new THREE.Group();
+            
+            // 随机面数和形态
+            const rings = Math.floor(Math.random() * 3) + 2;      // 2~4 环
+            const segments = Math.floor(Math.random() * 5) + 4;   // 4~8 边
+            
+            const baseScale = size * 0.8;
+            const verts = [];
+            
+            // 两极
+            verts.push(new THREE.Vector3(0, baseScale * (0.9 + Math.random()*0.4), 0));
+            verts.push(new THREE.Vector3(0, -baseScale * (0.9 + Math.random()*0.4), 0));
+            
+            // 中间环
+            for (let i = 1; i <= rings; i++) {
+                const theta = (i / (rings + 1)) * Math.PI;
+                const ringRadius = baseScale * Math.sin(theta) * (0.8 + Math.random() * 0.6);
+                const y = baseScale * Math.cos(theta);
+                
+                for (let j = 0; j < segments; j++) {
+                    const phi = (j / segments) * Math.PI * 2 + Math.random() * 0.2;
+                    const x = Math.cos(phi) * ringRadius;
+                    const z = Math.sin(phi) * ringRadius;
+                    verts.push(new THREE.Vector3(x, y, z));
+                }
+            }
+            
+            // 构建三角形面
+            const indices = [];
+            const topIdx = 0;
+            const bottomIdx = 1;
+            
+            for (let j = 0; j < segments; j++) {
+                const next = (j + 1) % segments;
+                indices.push(topIdx, 2 + j, 2 + next);
+            }
+            
+            for (let i = 0; i < rings - 1; i++) {
+                const row0 = 2 + i * segments;
+                const row1 = 2 + (i + 1) * segments;
+                for (let j = 0; j < segments; j++) {
+                    const next = (j + 1) % segments;
+                    indices.push(row0 + j, row1 + j, row0 + next);
+                    indices.push(row0 + next, row1 + j, row1 + next);
+                }
+            }
+            
+            const lastRow = 2 + (rings - 1) * segments;
+            for (let j = 0; j < segments; j++) {
+                const next = (j + 1) % segments;
+                indices.push(bottomIdx, lastRow + next, lastRow + j);
+            }
+            
+            // 轻微随机扰动
+            verts.forEach(v => {
+                v.x += (Math.random() - 0.5) * baseScale * 0.15;
+                v.y += (Math.random() - 0.5) * baseScale * 0.15;
+                v.z += (Math.random() - 0.5) * baseScale * 0.15;
+            });
+            
+            const geometry = new THREE.BufferGeometry();
+            const positionArray = [];
+            verts.forEach(v => { positionArray.push(v.x, v.y, v.z); });
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positionArray, 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+            
+            const mode = config.meteorDisplayMode;
+            
+            // 根据模式构建材质
+            if (mode === 0) { 
+                // 边线模式：只有轮廓线
+                const edges = new THREE.EdgesGeometry(geometry);
+                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
+                group.add(line);
+                group.userData.outlineLine = line;
+                group.userData.solidMesh = null;
+            } else {
+                // 剪影(1)或实体色块(2)都有实体填充
+                let fillColor;
+                let fillMaterial;
+                if (mode === 1) {
+                    fillMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+                } else {
+                    fillMaterial = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
+                }
+                const solidMesh = new THREE.Mesh(geometry, fillMaterial);
+                group.add(solidMesh);
+                group.userData.solidMesh = solidMesh;
+                
+                // 轮廓线
+                const edges = new THREE.EdgesGeometry(geometry);
+                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
+                group.add(line);
+                group.userData.outlineLine = line;
+            }
+            
+            // 锁定框 Sprite —— 放大尺寸使其更显眼 (从1.8倍提高到2.8倍)
+            const spriteMat = new THREE.SpriteMaterial({ 
+                map: getReticleTexture(config.meteorLockStyle, config.shipColor), 
+                transparent: true,
+                depthTest: false
+            });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.scale.set(size * 2.8, size * 2.8, 1);
+            sprite.visible = false;
+            sprite.renderOrder = 999;
+            group.add(sprite);
+            
+            group.userData.lockSprite = sprite;
+            return group;
+        }
+
+        // 更新所有陨石的显示模式
+        function applyMeteorDisplayMode(mode) {
+            meteors.forEach(m => {
+                const oldSolid = m.userData.solidMesh;
+                const oldLine = m.userData.outlineLine;
+                const color = config.meteorColor;
+                const size = m.userData.size;
+                const geometry = oldSolid ? oldSolid.geometry : oldLine.geometry;
+                
+                if (oldSolid) m.remove(oldSolid);
+                if (oldLine) m.remove(oldLine);
+                
+                if (mode === 0) {
+                    const edges = new THREE.EdgesGeometry(geometry);
+                    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
+                    m.add(line);
+                    m.userData.outlineLine = line;
+                    m.userData.solidMesh = null;
+                } else {
+                    let fillColor = (mode === 1) ? 0x000000 : color;
+                    const fillMaterial = new THREE.MeshBasicMaterial({ color: fillColor, side: THREE.DoubleSide });
+                    const solidMesh = new THREE.Mesh(geometry, fillMaterial);
+                    m.add(solidMesh);
+                    m.userData.solidMesh = solidMesh;
+                    
+                    const edges = new THREE.EdgesGeometry(geometry);
+                    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
+                    m.add(line);
+                    m.userData.outlineLine = line;
+                }
+                
+                // 更新锁定框大小
+                if (m.userData.lockSprite) {
+                    m.userData.lockSprite.scale.set(size * 2.8, size * 2.8, 1);
+                }
+            });
+        }
+
+        function updateMeteorOutlineColor(colorHex) {
+            meteors.forEach(m => {
+                if (m.userData.outlineLine) {
+                    m.userData.outlineLine.material.color.set(colorHex);
+                }
+                if (config.meteorDisplayMode === 2 && m.userData.solidMesh) {
+                    m.userData.solidMesh.material.color.set(colorHex);
+                }
+            });
+        }
+
         function createRingLine(radius, color, segments = 32) {
             const points = [];
             for (let i = 0; i <= segments; i++) {
@@ -615,20 +883,6 @@
             }
             const geom = new THREE.BufferGeometry().setFromPoints(points);
             return new THREE.LineLoop(geom, new THREE.LineBasicMaterial({ color: color }));
-        }
-
-        function createMeteorMesh(color, size) {
-            const group = new THREE.Group();
-            const sphereMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.5 });
-            const sphere = new THREE.Mesh(new THREE.SphereGeometry(size * 0.4, 8, 6), sphereMat);
-            group.add(sphere);
-            const ringMat = new THREE.LineBasicMaterial({ color: color });
-            const ring1 = createRingLine(size * 0.65, color);
-            const ring2 = createRingLine(size * 0.65, color);
-            const ring3 = createRingLine(size * 0.65, color);
-            ring1.rotation.x = ring2.rotation.y = ring3.rotation.z = Math.PI / 2;
-            group.add(ring1, ring2, ring3);
-            return group;
         }
 
         function spawnMeteor() {
@@ -647,6 +901,7 @@
             mesh.userData.velocity = mesh.position.clone().normalize().negate().multiplyScalar(config.meteorSpeed * (0.7 + Math.random() * 0.6));
             mesh.userData.size = size;
             mesh.userData.lockTimer = 0;
+            mesh.userData.isLocked = false;
             scene.add(mesh);
             meteors.push(mesh);
         }
@@ -734,17 +989,38 @@
             document.getElementById('heat-high').value = config.heatHigh;
             document.getElementById('ui-gravity-color').value = config.gravityColor;
             document.getElementById('meteor-color').value = config.meteorColor;
+            document.getElementById('ui-lock-style').value = config.meteorLockStyle;
+            document.getElementById('ui-meteor-mode').value = config.meteorDisplayMode;
 
             syncMainColor(config.baseColor);
 
             const sidebar = document.getElementById('sidebar');
             const menuBtn = document.getElementById('btn-menu');
+            
             menuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 sidebar.classList.toggle('active');
             });
 
-            // 滑块
+            document.getElementById('btn-fullscreen').addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {});
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                }
+            });
+
+            document.getElementById('btn-close').addEventListener('click', () => {
+                document.getElementById('main-container').style.display = 'none';
+                document.getElementById('offline-screen').style.display = 'flex';
+            });
+
+            document.getElementById('offline-screen').addEventListener('click', () => {
+                document.getElementById('offline-screen').style.display = 'none';
+                document.getElementById('main-container').style.display = 'flex';
+                onWindowResize();
+            });
+
             createSliderControl('ctrl-rad', config.sphereRadius, 1.0, 5.0, 0.1, v => { config.sphereRadius = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
             createSliderControl('ctrl-noise', config.noiseScale, 0.1, 5.0, 0.1, v => { config.noiseScale = v; generateTerrain(); saveConfig(); });
             createSliderControl('ctrl-amp', config.amplitude, 0.1, 2.0, 0.05, v => { config.amplitude = v; generateTerrain(); randomizeOrbits(); saveConfig(); });
@@ -759,8 +1035,9 @@
             createSliderControl('ctrl-gravity-bright', config.gravityBrightness, 0.2, 2.5, 0.1, v => { config.gravityBrightness = v; updateGravityLines(); saveConfig(); });
             createSliderControl('ctrl-meteor-speed', config.meteorSpeed, 0.2, 2.5, 0.1, v => { config.meteorSpeed = v; saveConfig(); });
             createSliderControl('ctrl-meteor-density', config.meteorDensity, 0.2, 3.0, 0.1, v => { config.meteorDensity = v; saveConfig(); });
-            createSliderControl('ctrl-meteor-size', config.meteorSize, 0.3, 2.0, 0.1, v => { config.meteorSize = v; saveConfig(); });
+            createSliderControl('ctrl-meteor-size', config.meteorSize, 0.1, 1.0, 0.05, v => { config.meteorSize = v; saveConfig(); });
             createSliderControl('ctrl-lock-dist', config.lockDistance, 1.0, 5.0, 0.1, v => { config.lockDistance = v; saveConfig(); });
+            createSliderControl('ctrl-lock-dur', config.lockDuration, 0.2, 2.0, 0.1, v => { config.lockDuration = v; saveConfig(); });
 
             createSwitch('switch-auto-rotate', config.autoRotate, v => { config.autoRotate = v; saveConfig(); });
             createSwitch('switch-trail', config.showTrail, v => { config.showTrail = v; saveConfig(); });
@@ -783,7 +1060,20 @@
             document.getElementById('ui-pcolor').addEventListener('input', e => { config.shipColor = e.target.value; updateShipColor(config.shipColor); saveConfig(); });
             document.getElementById('ui-sstyle').addEventListener('change', e => { config.shipStyle = parseInt(e.target.value); ships.forEach(s => s.mesh.material.wireframe = (config.shipStyle === 0)); saveConfig(); });
             document.getElementById('ui-gravity-color').addEventListener('input', e => { config.gravityColor = e.target.value; updateGravityLines(); saveConfig(); });
-            document.getElementById('meteor-color').addEventListener('input', e => { config.meteorColor = e.target.value; saveConfig(); });
+            
+            document.getElementById('meteor-color').addEventListener('input', e => { 
+                config.meteorColor = e.target.value; 
+                updateMeteorOutlineColor(config.meteorColor);
+                saveConfig(); 
+            });
+            document.getElementById('ui-lock-style').addEventListener('change', e => { config.meteorLockStyle = parseInt(e.target.value); saveConfig(); });
+            
+            document.getElementById('ui-meteor-mode').addEventListener('change', e => {
+                const newMode = parseInt(e.target.value);
+                config.meteorDisplayMode = newMode;
+                applyMeteorDisplayMode(newMode);
+                saveConfig();
+            });
         }
 
         function init3D() {
@@ -910,7 +1200,6 @@
                     return;
                 }
                 if (isDragging && dragDistance < 5) {
-                    // 轻触画布空白区域也可切换侧边栏（保留原有交互）
                     document.getElementById('sidebar').classList.toggle('active');
                 }
                 isDragging = false;
@@ -934,14 +1223,14 @@
             window.addEventListener('touchend', onUp);
             window.addEventListener('touchmove', onMove, { passive: false });
             
-            // 阻止侧边栏触摸事件冒泡，确保滑块等控件正常操作
             const sidebar = document.getElementById('sidebar');
-            sidebar.addEventListener('touchstart', (e) => e.stopPropagation());
-            sidebar.addEventListener('touchmove', (e) => e.stopPropagation());
+            sidebar.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});
+            sidebar.addEventListener('touchmove', (e) => e.stopPropagation(), {passive: true});
         }
 
         function onWindowResize() {
             const c = document.getElementById('canvas-container');
+            if(c.clientWidth === 0) return;
             camera.aspect = c.clientWidth / c.clientHeight; camera.updateProjectionMatrix();
             renderer.setSize(c.clientWidth, c.clientHeight);
         }
@@ -964,6 +1253,9 @@
             }
 
             const meteorsToRemove = new Set();
+            
+            meteors.forEach(m => m.userData.isLocked = false);
+
             ships.forEach(ship => {
                 const shipPos = new THREE.Vector3(); ship.container.getWorldPosition(shipPos);
                 let closestMeteor = null, minDist = Infinity;
@@ -973,15 +1265,18 @@
                     if (dist < config.lockDistance && dist < minDist) { minDist = dist; closestMeteor = m; }
                 });
                 if (closestMeteor) {
+                    closestMeteor.userData.isLocked = true;
                     if (ship.lockTarget === closestMeteor) closestMeteor.userData.lockTimer += delta;
                     else { ship.lockTarget = closestMeteor; closestMeteor.userData.lockTimer = 0; }
+                    
                     if (config.showLockLine) {
                         ship.lockLine.visible = true;
                         ship.lockLine.material.color.set(config.shipColor);
                         ship.lockLine.geometry.setFromPoints([shipPos, closestMeteor.position.clone()]);
                         ship.lockLine.computeLineDistances();
                     } else ship.lockLine.visible = false;
-                    if (closestMeteor.userData.lockTimer >= 1.0) {
+                    
+                    if (closestMeteor.userData.lockTimer >= config.lockDuration) {
                         addLockExplosion(closestMeteor.position.clone(), config.shipColor, closestMeteor.userData.size);
                         meteorsToRemove.add(closestMeteor);
                         ship.lockTarget = null; ship.lockLine.visible = false;
@@ -991,7 +1286,20 @@
 
             meteors.forEach(m => {
                 if (meteorsToRemove.has(m)) return;
+                
+                if (m.userData.isLocked) {
+                    m.userData.lockSprite.visible = true;
+                    m.userData.lockSprite.material.map = getReticleTexture(config.meteorLockStyle, config.shipColor);
+                    m.userData.lockSprite.material.rotation -= delta * 2;
+                } else {
+                    m.userData.lockSprite.visible = false;
+                }
+
                 m.position.addScaledVector(m.userData.velocity, delta);
+                m.rotation.x += delta * 0.8;
+                m.rotation.y += delta * 0.6;
+                m.rotation.z += delta * 0.4;
+
                 raycaster.set(m.position, m.position.clone().normalize().negate());
                 const hits = raycaster.intersectObject(terrainMesh);
                 if (hits.length && hits[0].distance < 0.8) {
