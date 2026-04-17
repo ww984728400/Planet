@@ -29,6 +29,7 @@
         /* 消除移动端原生点击的高亮闪烁，提升原生APP手感 */
         * {
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box; /* 确保所有元素的宽度计算包含 padding 和 border */
         }
 
         body {
@@ -148,6 +149,7 @@
             flex-direction: column;
             gap: 20px;
             overflow-y: auto;
+            overflow-x: hidden; /* 防止任何内部控件撑爆产生横向平移 */
             z-index: 25;
             transform: translateX(100%);
             transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
@@ -157,16 +159,65 @@
             pointer-events: auto;
         }
 
-        /* 移动端侧边栏按比例自适应，并留出画面空白区域 */
+        /* -------------------------------------------
+           移动端侧边栏宽度、UI元素和文本比例自适应缩放
+           ------------------------------------------- */
         @media (max-width: 600px) {
             #sidebar {
                 width: 75vw;
                 max-width: 320px;
-                padding: 70px 12px 20px 12px;
+                padding: 70px 10px 20px 10px; /* 进一步压缩侧边栏内边距 */
             }
-            .control-label {
-                min-width: 90px;
+
+            /* UI整体缩放排版 */
+            .panel { 
+                padding: 12px 10px 10px; 
             }
+            .control-row { 
+                gap: 6px; 
+                font-size: 11px; 
+            }
+            .control-label { 
+                min-width: 80px; 
+                font-size: 10px; 
+            }
+            .control-label .cn { 
+                font-size: 9px; 
+            }
+            
+            /* 下拉框解除死板固定宽度，改为弹性自适应 */
+            select { 
+                width: 100%; 
+                flex: 1; 
+                max-width: 125px; 
+                font-size: 10px; 
+                padding: 4px; 
+            }
+            
+            .slider-value { 
+                min-width: 36px; 
+                font-size: 10px; 
+                padding: 2px 4px; 
+            }
+            
+            /* 滑块控件缩放 */
+            input[type="range"] { height: 24px; }
+            input[type="range"]::-webkit-slider-thumb {
+                width: 22px; height: 22px; margin-top: -9px;
+            }
+            
+            /* 开关控件缩放 */
+            .switch { width: 44px; height: 22px; }
+            .slider-switch:before { height: 16px; width: 16px; transform: translateX(2px); }
+            .switch input:checked + .slider-switch:before { transform: translateX(24px); }
+            
+            /* 按钮和颜色选择器缩放 */
+            .action-btn { font-size: 11px; padding: 6px; min-height: 28px; }
+            .color-picker { width: 40px; min-height: 28px; padding: 0; }
+            
+            /* 颜色组对齐 */
+            .color-group { gap: 4px; justify-content: space-between; }
+            .color-group span { min-width: 20px; font-size: 9px; }
         }
 
         #sidebar.active { transform: translateX(0); }
@@ -239,6 +290,7 @@
             -webkit-appearance: none;
             appearance: none;
             touch-action: none; 
+            width: 100%;
         }
         input[type="range"]::-webkit-slider-runnable-track {
             height: 6px;
