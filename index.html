@@ -3,7 +3,7 @@
 
   <head>
     <meta charset="UTF-8">
-    <title>planet 2.0</title>
+    <title>Planet 2.1</title>
     
 
   </head>
@@ -24,6 +24,11 @@
             --accent: #00eeff;         
             --text-dim: #884422;       
             --ui-glow: rgba(255, 85, 0, 0.2);
+        }
+
+        /* 消除移动端原生点击的高亮闪烁，提升原生APP手感 */
+        * {
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -48,13 +53,23 @@
         }
 
         #canvas-container {
-            flex: 1;
-            position: relative;
+            /* 绝对定位，脱离 flex 布局，确保画面永远铺满并处于真正的窗口中心 */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             cursor: crosshair;
             touch-action: none;  
+            z-index: 1;
+        }
+        
+        #canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
         }
 
-        /* 顶部独立控制组 */
         #top-controls {
             position: absolute;
             top: 20px;
@@ -133,12 +148,25 @@
             flex-direction: column;
             gap: 20px;
             overflow-y: auto;
-            z-index: 15;
+            z-index: 25;
             transform: translateX(100%);
             transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
             backdrop-filter: blur(6px);
-            touch-action: pan-y;  
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            pointer-events: auto;
+        }
+
+        /* 移动端侧边栏按比例自适应，并留出画面空白区域 */
+        @media (max-width: 600px) {
+            #sidebar {
+                width: 75vw;
+                max-width: 320px;
+                padding: 70px 12px 20px 12px;
+            }
+            .control-label {
+                min-width: 90px;
+            }
         }
 
         #sidebar.active { transform: translateX(0); }
@@ -203,29 +231,30 @@
             flex: 1;
         }
         
+        /* 扩大滑块和轨道点击热区，并避免与页面滚动冲突 */
         input[type="range"] {
             flex: 1;
-            height: 24px;
+            height: 28px; 
             background: transparent;
             -webkit-appearance: none;
             appearance: none;
-            touch-action: none;
+            touch-action: none; 
         }
         input[type="range"]::-webkit-slider-runnable-track {
-            height: 4px;
+            height: 6px;
             background: #151515;
             border: 1px solid var(--main);
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
+            width: 28px;
+            height: 28px;
             background: var(--main);
             border: 1.5px solid var(--main);
             border-radius: 0;
             cursor: pointer;
             box-shadow: 0 0 10px var(--main);
-            margin-top: -10px;
+            margin-top: -12px;
         }
         .slider-value {
             min-width: 52px;
@@ -243,16 +272,19 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            touch-action: manipulation;
         }
+        /* 扩大 Switch 热区 */
         .switch {
             position: relative;
             display: inline-block;
-            width: 48px;
-            height: 24px;
+            width: 56px;
+            height: 28px;
             border: 1.5px solid var(--main);
             background: transparent;
             box-sizing: content-box;
             cursor: pointer;
+            touch-action: manipulation;
         }
         .switch input {
             opacity: 0;
@@ -272,22 +304,23 @@
         }
         .slider-switch:before {
             content: "";
-            height: 18px;
-            width: 18px;
+            height: 22px;
+            width: 22px;
             background-color: var(--main);
             box-shadow: 0 0 8px var(--main);
             transition: transform 0.15s;
             transform: translateX(2px);
         }
         .switch input:checked + .slider-switch:before {
-            transform: translateX(26px);
+            transform: translateX(28px);
         }
         .switch input:checked + .slider-switch {
             background-color: rgba(30,30,30,0.9);
         }
 
         .action-btn, select, .color-picker {
-            min-height: 32px;
+            min-height: 38px;
+            touch-action: manipulation;
         }
 
         .action-btn {
@@ -297,13 +330,12 @@
             padding: 8px 10px; 
             cursor: pointer;
             font-family: inherit; 
-            font-size: 12px; 
+            font-size: 14px; 
             font-weight: bold;
             transition: none; 
             text-align: center; 
             letter-spacing: 1.2px;
             text-transform: uppercase;
-            touch-action: manipulation;
         }
         .action-btn:hover { background: rgba(255, 85, 0, 0.15); color: var(--main); }
         .action-btn:active { transform: scale(0.98); }
@@ -313,7 +345,7 @@
             color: var(--accent); 
             border: 1px solid var(--main);
             font-family: inherit; 
-            font-size: 12px; 
+            font-size: 13px; 
             padding: 6px 8px;
             outline: none; 
             cursor: pointer; 
@@ -327,11 +359,11 @@
         }
 
         .color-picker {
-            width: 52px; 
+            width: 54px; 
             border: 1px solid var(--main);
             background: transparent; 
             cursor: pointer; 
-            padding: 2px;
+            padding: 0;
         }
 
         .color-group {
@@ -375,6 +407,8 @@
 <div id="offline-screen" title="Click to restart / 点击恢复运行">SYSTEM OFFLINE</div>
 
 <div id="main-container">
+    <div id="canvas-container"></div>
+
     <div id="top-controls">
         <button class="icon-btn" id="btn-menu" title="MENU / 菜单">
             <span class="menu-line"></span>
@@ -386,7 +420,6 @@
     </div>
 
     <div id="scanlines"></div>
-    <div id="canvas-container"></div>
     
     <div id="sidebar">
         <div class="panel">
@@ -635,7 +668,7 @@
             showLockLine: true,
             meteorLockStyle: 0,
             lockDuration: 1.0,
-            meteorDisplayMode: 1   // 0=边线, 1=剪影, 2=实体色块
+            meteorDisplayMode: 1
         };
 
         const LOCAL_STORAGE_KEY = 'terrain_console_config_v15';
@@ -665,13 +698,13 @@
         let lockExplosions = [];      
         let isDragging = false;
         let dragDistance = 0; 
+        let interactionStartTime = 0; // 新增交互时间戳
         let previousMousePosition = { x: 0, y: 0 };
         let autoRotAxis = new THREE.Vector3(1, 1, 0).normalize();
         let timeGlobal = 0;
         let isTouchActive = false;
         let meteorSpawnAcc = 0;
 
-        // 生成赛博朋克风锁定框贴图
         const reticleCache = {};
         function getReticleTexture(style, colorHex) {
             const key = style + '_' + colorHex;
@@ -711,68 +744,47 @@
             return tex;
         }
 
-        // ---------- 陨石生成：支持三种显示模式，锁定框放大 ----------
         function createMeteorMesh(color, size) {
             const group = new THREE.Group();
-            
-            // 随机面数和形态
-            const rings = Math.floor(Math.random() * 3) + 2;      // 2~4 环
-            const segments = Math.floor(Math.random() * 5) + 4;   // 4~8 边
-            
+            const rings = Math.floor(Math.random() * 3) + 2;
+            const segments = Math.floor(Math.random() * 5) + 4;
             const baseScale = size * 0.8;
             const verts = [];
-            
-            // 两极
             verts.push(new THREE.Vector3(0, baseScale * (0.9 + Math.random()*0.4), 0));
             verts.push(new THREE.Vector3(0, -baseScale * (0.9 + Math.random()*0.4), 0));
-            
-            // 中间环
             for (let i = 1; i <= rings; i++) {
                 const theta = (i / (rings + 1)) * Math.PI;
                 const ringRadius = baseScale * Math.sin(theta) * (0.8 + Math.random() * 0.6);
                 const y = baseScale * Math.cos(theta);
-                
                 for (let j = 0; j < segments; j++) {
                     const phi = (j / segments) * Math.PI * 2 + Math.random() * 0.2;
-                    const x = Math.cos(phi) * ringRadius;
-                    const z = Math.sin(phi) * ringRadius;
-                    verts.push(new THREE.Vector3(x, y, z));
+                    verts.push(new THREE.Vector3(Math.cos(phi)*ringRadius, y, Math.sin(phi)*ringRadius));
                 }
             }
-            
-            // 构建三角形面
             const indices = [];
-            const topIdx = 0;
-            const bottomIdx = 1;
-            
+            const topIdx = 0, bottomIdx = 1;
             for (let j = 0; j < segments; j++) {
                 const next = (j + 1) % segments;
                 indices.push(topIdx, 2 + j, 2 + next);
             }
-            
             for (let i = 0; i < rings - 1; i++) {
-                const row0 = 2 + i * segments;
-                const row1 = 2 + (i + 1) * segments;
+                const row0 = 2 + i * segments, row1 = 2 + (i + 1) * segments;
                 for (let j = 0; j < segments; j++) {
                     const next = (j + 1) % segments;
                     indices.push(row0 + j, row1 + j, row0 + next);
                     indices.push(row0 + next, row1 + j, row1 + next);
                 }
             }
-            
             const lastRow = 2 + (rings - 1) * segments;
             for (let j = 0; j < segments; j++) {
                 const next = (j + 1) % segments;
                 indices.push(bottomIdx, lastRow + next, lastRow + j);
             }
-            
-            // 轻微随机扰动
             verts.forEach(v => {
                 v.x += (Math.random() - 0.5) * baseScale * 0.15;
                 v.y += (Math.random() - 0.5) * baseScale * 0.15;
                 v.z += (Math.random() - 0.5) * baseScale * 0.15;
             });
-            
             const geometry = new THREE.BufferGeometry();
             const positionArray = [];
             verts.forEach(v => { positionArray.push(v.x, v.y, v.z); });
@@ -781,36 +793,24 @@
             geometry.computeVertexNormals();
             
             const mode = config.meteorDisplayMode;
-            
-            // 根据模式构建材质
             if (mode === 0) { 
-                // 边线模式：只有轮廓线
                 const edges = new THREE.EdgesGeometry(geometry);
                 const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
                 group.add(line);
                 group.userData.outlineLine = line;
                 group.userData.solidMesh = null;
             } else {
-                // 剪影(1)或实体色块(2)都有实体填充
-                let fillColor;
-                let fillMaterial;
-                if (mode === 1) {
-                    fillMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
-                } else {
-                    fillMaterial = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
-                }
+                let fillColor = (mode === 1) ? 0x000000 : color;
+                const fillMaterial = new THREE.MeshBasicMaterial({ color: fillColor, side: THREE.DoubleSide });
                 const solidMesh = new THREE.Mesh(geometry, fillMaterial);
                 group.add(solidMesh);
                 group.userData.solidMesh = solidMesh;
-                
-                // 轮廓线
                 const edges = new THREE.EdgesGeometry(geometry);
                 const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
                 group.add(line);
                 group.userData.outlineLine = line;
             }
             
-            // 锁定框 Sprite —— 放大尺寸使其更显眼 (从1.8倍提高到2.8倍)
             const spriteMat = new THREE.SpriteMaterial({ 
                 map: getReticleTexture(config.meteorLockStyle, config.shipColor), 
                 transparent: true,
@@ -821,12 +821,10 @@
             sprite.visible = false;
             sprite.renderOrder = 999;
             group.add(sprite);
-            
             group.userData.lockSprite = sprite;
             return group;
         }
 
-        // 更新所有陨石的显示模式
         function applyMeteorDisplayMode(mode) {
             meteors.forEach(m => {
                 const oldSolid = m.userData.solidMesh;
@@ -834,10 +832,8 @@
                 const color = config.meteorColor;
                 const size = m.userData.size;
                 const geometry = oldSolid ? oldSolid.geometry : oldLine.geometry;
-                
                 if (oldSolid) m.remove(oldSolid);
                 if (oldLine) m.remove(oldLine);
-                
                 if (mode === 0) {
                     const edges = new THREE.EdgesGeometry(geometry);
                     const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
@@ -850,14 +846,11 @@
                     const solidMesh = new THREE.Mesh(geometry, fillMaterial);
                     m.add(solidMesh);
                     m.userData.solidMesh = solidMesh;
-                    
                     const edges = new THREE.EdgesGeometry(geometry);
                     const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
                     m.add(line);
                     m.userData.outlineLine = line;
                 }
-                
-                // 更新锁定框大小
                 if (m.userData.lockSprite) {
                     m.userData.lockSprite.scale.set(size * 2.8, size * 2.8, 1);
                 }
@@ -866,12 +859,8 @@
 
         function updateMeteorOutlineColor(colorHex) {
             meteors.forEach(m => {
-                if (m.userData.outlineLine) {
-                    m.userData.outlineLine.material.color.set(colorHex);
-                }
-                if (config.meteorDisplayMode === 2 && m.userData.solidMesh) {
-                    m.userData.solidMesh.material.color.set(colorHex);
-                }
+                if (m.userData.outlineLine) m.userData.outlineLine.material.color.set(colorHex);
+                if (config.meteorDisplayMode === 2 && m.userData.solidMesh) m.userData.solidMesh.material.color.set(colorHex);
             });
         }
 
@@ -977,6 +966,11 @@
                 if (s.trailLine) s.trailLine.material.color.set(color);
                 if (s.lockLine) s.lockLine.material.color.set(color);
             });
+            meteors.forEach(m => {
+                if (m.userData.lockSprite) {
+                    m.userData.lockSprite.material.map = getReticleTexture(config.meteorLockStyle, colorHex);
+                }
+            });
         }
 
         function initUI() {
@@ -1003,11 +997,8 @@
             });
 
             document.getElementById('btn-fullscreen').addEventListener('click', () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => {});
-                } else {
-                    if (document.exitFullscreen) document.exitFullscreen();
-                }
+                if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => {});
+                else if (document.exitFullscreen) document.exitFullscreen();
             });
 
             document.getElementById('btn-close').addEventListener('click', () => {
@@ -1066,7 +1057,11 @@
                 updateMeteorOutlineColor(config.meteorColor);
                 saveConfig(); 
             });
-            document.getElementById('ui-lock-style').addEventListener('change', e => { config.meteorLockStyle = parseInt(e.target.value); saveConfig(); });
+            document.getElementById('ui-lock-style').addEventListener('change', e => { 
+                config.meteorLockStyle = parseInt(e.target.value); 
+                meteors.forEach(m => { if (m.userData.lockSprite) m.userData.lockSprite.material.map = getReticleTexture(config.meteorLockStyle, config.shipColor); });
+                saveConfig(); 
+            });
             
             document.getElementById('ui-meteor-mode').addEventListener('change', e => {
                 const newMode = parseInt(e.target.value);
@@ -1079,11 +1074,12 @@
         function init3D() {
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            // 直接绑定 window.innerWidth / innerHeight，确保彻底居中且尺寸正确
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(0, 2.5, 10.5);
             camera.lookAt(0, 0, 0);
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
             raycaster = new THREE.Raycaster();
@@ -1181,29 +1177,39 @@
         }
 
         function setupInteractions(canvas) {
+            const sidebar = document.getElementById('sidebar');
+            
             const onDown = (e) => {
-                if (e.touches) {
-                    isTouchActive = true;
-                    e.preventDefault();
+                if (e.touches) { 
+                    isTouchActive = true; 
+                    e.preventDefault(); // 只在画布上防止默认行为，侧边栏UI不受影响
                 } else if (isTouchActive) return;
+                
                 isDragging = true;
                 dragDistance = 0;
+                interactionStartTime = Date.now(); // 记录按下时间戳用于判断长短按
+                
                 const p = e.touches ? e.touches[0] : e;
                 previousMousePosition = { x: p.clientX, y: p.clientY };
             };
+            
             const onUp = (e) => {
-                if (e.touches) {
-                    isTouchActive = false;
-                    e.preventDefault();
-                } else if (isTouchActive) {
-                    isTouchActive = false;
-                    return;
+                if (e.touches) { isTouchActive = false; }
+                else if (isTouchActive) { isTouchActive = false; return; }
+                
+                if (!isDragging) return;
+                
+                const duration = Date.now() - interactionStartTime;
+                
+                // 判断：拖动距离很小，并且按下时间小于300ms，判定为“单击”，呼出/呼出侧边栏
+                // 若时间较长则判定为“长按”，直接释放，不执行菜单呼出
+                if (dragDistance < 5 && duration < 300) {
+                    sidebar.classList.toggle('active');
                 }
-                if (isDragging && dragDistance < 5) {
-                    document.getElementById('sidebar').classList.toggle('active');
-                }
+                
                 isDragging = false;
             };
+            
             const onMove = (e) => {
                 if (!isDragging) return;
                 if (e.touches) e.preventDefault();
@@ -1216,23 +1222,21 @@
                 ships.forEach(s => s.orbitGroup.quaternion.multiplyQuaternions(q, s.orbitGroup.quaternion));
                 previousMousePosition = { x: p.clientX, y: p.clientY };
             };
+            
             canvas.addEventListener('mousedown', onDown);
             window.addEventListener('mouseup', onUp);
             window.addEventListener('mousemove', onMove);
             canvas.addEventListener('touchstart', onDown, { passive: false });
             window.addEventListener('touchend', onUp);
             window.addEventListener('touchmove', onMove, { passive: false });
-            
-            const sidebar = document.getElementById('sidebar');
-            sidebar.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});
-            sidebar.addEventListener('touchmove', (e) => e.stopPropagation(), {passive: true});
         }
 
         function onWindowResize() {
-            const c = document.getElementById('canvas-container');
-            if(c.clientWidth === 0) return;
-            camera.aspect = c.clientWidth / c.clientHeight; camera.updateProjectionMatrix();
-            renderer.setSize(c.clientWidth, c.clientHeight);
+            // 绑定真正的窗口大小，规避 DOM 容器挤压，确保绝对居中
+            camera.aspect = window.innerWidth / window.innerHeight; 
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         }
 
         function animate() {
@@ -1253,7 +1257,6 @@
             }
 
             const meteorsToRemove = new Set();
-            
             meteors.forEach(m => m.userData.isLocked = false);
 
             ships.forEach(ship => {
@@ -1286,7 +1289,6 @@
 
             meteors.forEach(m => {
                 if (meteorsToRemove.has(m)) return;
-                
                 if (m.userData.isLocked) {
                     m.userData.lockSprite.visible = true;
                     m.userData.lockSprite.material.map = getReticleTexture(config.meteorLockStyle, config.shipColor);
@@ -1294,12 +1296,10 @@
                 } else {
                     m.userData.lockSprite.visible = false;
                 }
-
                 m.position.addScaledVector(m.userData.velocity, delta);
                 m.rotation.x += delta * 0.8;
                 m.rotation.y += delta * 0.6;
                 m.rotation.z += delta * 0.4;
-
                 raycaster.set(m.position, m.position.clone().normalize().negate());
                 const hits = raycaster.intersectObject(terrainMesh);
                 if (hits.length && hits[0].distance < 0.8) {
