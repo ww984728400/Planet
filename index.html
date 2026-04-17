@@ -24,7 +24,7 @@
             --accent: #00eeff;         
             --text-dim: #884422;       
             --ui-glow: rgba(255, 85, 0, 0.2);
-            --yellow: #ffe600; /* 新增参考图中的高亮黄 */
+            --theme-color: #ffe600; /* 全局动态主题色 */
         }
 
         /* 消除移动端原生点击的高亮闪烁，提升原生APP手感 */
@@ -98,8 +98,8 @@
         }
 
         .icon-btn:hover {
-            border-color: var(--yellow);
-            color: var(--yellow);
+            border-color: var(--theme-color);
+            color: var(--theme-color);
         }
 
         #btn-menu {
@@ -114,7 +114,7 @@
             transition: none;
         }
 
-        #btn-menu:hover .menu-line { background: var(--yellow); }
+        #btn-menu:hover .menu-line { background: var(--theme-color); }
 
         #offline-screen {
             display: none;
@@ -131,11 +131,11 @@
             cursor: pointer;
         }
 
-        /* --- 核心侧边栏 UI 优化区 --- */
+        /* --- 核心侧边栏 UI --- */
         #sidebar {
             position: absolute;
             top: 0; right: 0;
-            width: 360px; /* 调整默认宽度 */
+            width: 360px; 
             height: 100vh;
             border-left: 1px solid #222;
             background: rgba(8, 8, 8, 0.96);
@@ -184,7 +184,7 @@
             font-size: 12px;
             font-weight: bold;
             letter-spacing: 1px;
-            color: #fff; /* 改为白色主标题 */
+            color: #fff; 
             border-left: 3px solid #fff;
         }
 
@@ -204,7 +204,6 @@
             gap: 10px; 
         }
 
-        /* 标签排版重构：EN / 中文 */
         .control-label {
             letter-spacing: 0.5px;
             display: flex;
@@ -220,7 +219,7 @@
             margin-left: 6px;
         }
 
-        /* --- Stepper 步进器样式 (替代原Slider) --- */
+        /* --- Stepper 步进器样式 --- */
         .stepper-container {
             display: flex;
             align-items: center;
@@ -242,8 +241,8 @@
             font-family: inherit;
         }
         .step-btn:hover, .step-btn:active {
-            border-color: var(--yellow);
-            color: var(--yellow);
+            border-color: var(--theme-color);
+            color: var(--theme-color);
         }
         .step-val {
             width: 50px;
@@ -253,13 +252,13 @@
             align-items: center;
             justify-content: flex-end;
             padding: 0 6px;
-            color: var(--yellow);
+            color: var(--theme-color);
             font-size: 11px;
             font-weight: bold;
             background: #000;
         }
 
-        /* --- Toggle 状态开关按钮 (替代原拨动开关) --- */
+        /* --- Toggle 状态开关按钮 --- */
         .toggle-btn {
             width: 70px;
             height: 24px;
@@ -273,9 +272,9 @@
             touch-action: manipulation;
         }
         .toggle-btn.on {
-            background: var(--yellow);
+            background: var(--theme-color);
             color: #000;
-            border-color: var(--yellow);
+            border-color: var(--theme-color);
             font-weight: bold;
         }
         .toggle-btn.off {
@@ -297,13 +296,12 @@
             text-transform: uppercase;
             touch-action: manipulation;
         }
-        .action-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+        .action-btn:hover { border-color: var(--theme-color); color: var(--theme-color); }
         .action-btn:active { background: #222; }
 
-        /* 下拉框硬核化 */
         select {
             background: #050505; 
-            color: var(--yellow); 
+            color: var(--theme-color); 
             border: 1px solid #444;
             font-family: inherit; 
             font-size: 11px; 
@@ -321,7 +319,6 @@
             color: #fff;
         }
 
-        /* 色彩选择器硬核化：极简方块 */
         .color-picker {
             width: 24px; 
             height: 24px;
@@ -331,7 +328,6 @@
             padding: 0;
             touch-action: manipulation;
         }
-        /* 针对不同浏览器的色块去边距处理 */
         .color-picker::-webkit-color-swatch-wrapper { padding: 0; }
         .color-picker::-webkit-color-swatch { border: none; }
         .color-picker::-moz-color-swatch { border: none; }
@@ -349,7 +345,6 @@
             text-transform: uppercase;
         }
 
-        /* 虚线分割线 */
         .divider {
             height: 0;
             border-bottom: 1px dashed #333;
@@ -367,7 +362,7 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #444; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--theme-color); }
     </style>
 </head>
 <body>
@@ -430,7 +425,7 @@
             </div>
             <div class="control-row">
                 <div class="control-label">COLOR<span class="cn">/ 基础色</span></div>
-                <input type="color" id="ui-color" class="color-picker" value="#0088ff">
+                <input type="color" id="ui-color" class="color-picker" value="#ffe600">
             </div>
             <div class="divider"></div>
             <div class="control-row block">
@@ -612,7 +607,7 @@
             amplitude: 0.6,
             gridRes: 35, 
             mode: 0,
-            baseColor: '#0088ff',
+            baseColor: '#ffe600', /* 默认颜色调整为黄色，与 UI 对应 */
             lineWidth: 1.0,
             brightness: 1.0,
             heatLow: '#0033cc',
@@ -656,6 +651,8 @@
         function syncMainColor(color) {
             document.documentElement.style.setProperty('--main', color);
             document.documentElement.style.setProperty('--ui-glow', color + '40');
+            // 核心修改：让侧边栏的主题高亮色与所选的基础网格色实时同步联动
+            document.documentElement.style.setProperty('--theme-color', color); 
             const c = new THREE.Color(color);
             c.multiplyScalar(1.5);
             document.documentElement.style.setProperty('--accent', '#' + c.getHexString());
@@ -890,7 +887,6 @@
             lockExplosions.push({ group, rings, size, progress: 0, duration: 0.8, color });
         }
 
-        // --- 核心修改区：将滑动条改为硬核步进器 [-] [10] [+] ---
         function createSliderControl(containerId, value, min, max, step, onChange) {
             const container = document.getElementById(containerId);
             container.className = 'stepper-container';
@@ -914,7 +910,6 @@
 
             const start = (delta) => {
                 updateVal(delta);
-                // 长按连击支持
                 timer = setInterval(() => updateVal(delta), 120);
             };
             const stop = () => { if(timer) clearInterval(timer); };
@@ -930,7 +925,6 @@
             return { setValue: (v) => { current = v; valDisp.textContent = v.toFixed(step < 1 ? 2 : 0); } };
         }
 
-        // --- 核心修改区：将滑动开关改为硬核状态按钮 [ ON / 开 ] ---
         function createSwitch(containerId, initialState, onChange) {
             const container = document.getElementById(containerId);
             let state = initialState;
