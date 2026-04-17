@@ -24,12 +24,13 @@
             --accent: #00eeff;         
             --text-dim: #884422;       
             --ui-glow: rgba(255, 85, 0, 0.2);
+            --yellow: #ffe600; /* 新增参考图中的高亮黄 */
         }
 
         /* 消除移动端原生点击的高亮闪烁，提升原生APP手感 */
         * {
             -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box; /* 确保所有元素的宽度计算包含 padding 和 border */
+            box-sizing: border-box; 
         }
 
         body {
@@ -54,7 +55,6 @@
         }
 
         #canvas-container {
-            /* 绝对定位，脱离 flex 布局，确保画面永远铺满并处于真正的窗口中心 */
             position: absolute;
             top: 0;
             left: 0;
@@ -82,44 +82,39 @@
 
         .icon-btn {
             background: rgba(5, 5, 5, 0.85);
-            border: 1.5px solid #888888;
-            color: #888888;
-            width: 44px;
-            height: 44px;
+            border: 1px solid #444;
+            color: #888;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             transition: none;
             backdrop-filter: blur(4px);
             padding: 0;
-            box-shadow: 0 0 12px rgba(0,0,0,0.3);
             touch-action: manipulation;
         }
 
         .icon-btn:hover {
-            border-color: var(--main);
-            color: var(--main);
-            box-shadow: 0 0 12px var(--ui-glow);
+            border-color: var(--yellow);
+            color: var(--yellow);
         }
 
         #btn-menu {
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
         }
 
         .menu-line {
-            width: 22px;
+            width: 20px;
             height: 2px;
-            background: #888888;
+            background: #888;
             transition: none;
-            border-radius: 0;
         }
 
-        #btn-menu:hover .menu-line {
-            background: var(--main);
-        }
+        #btn-menu:hover .menu-line { background: var(--yellow); }
 
         #offline-screen {
             display: none;
@@ -136,120 +131,71 @@
             cursor: pointer;
         }
 
+        /* --- 核心侧边栏 UI 优化区 --- */
         #sidebar {
             position: absolute;
             top: 0; right: 0;
-            width: 400px;
+            width: 360px; /* 调整默认宽度 */
             height: 100vh;
-            border-left: 1px solid var(--main);
-            background: rgba(5, 5, 5, 0.94);
-            padding: 85px 22px 22px 22px;
-            box-sizing: border-box;
+            border-left: 1px solid #222;
+            background: rgba(8, 8, 8, 0.96);
+            padding: 70px 18px 20px 18px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
             overflow-y: auto;
-            overflow-x: hidden; /* 防止任何内部控件撑爆产生横向平移 */
+            overflow-x: hidden; 
             z-index: 25;
             transform: translateX(100%);
             transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
             pointer-events: auto;
         }
 
-        /* -------------------------------------------
-           移动端侧边栏宽度、UI元素和文本比例自适应缩放
-           ------------------------------------------- */
         @media (max-width: 600px) {
             #sidebar {
                 width: 75vw;
                 max-width: 320px;
-                padding: 70px 10px 20px 10px; /* 进一步压缩侧边栏内边距 */
+                padding: 60px 12px 20px 12px;
             }
-
-            /* UI整体缩放排版 */
-            .panel { 
-                padding: 12px 10px 10px; 
-            }
-            .control-row { 
-                gap: 6px; 
-                font-size: 11px; 
-            }
-            .control-label { 
-                min-width: 80px; 
-                font-size: 10px; 
-            }
-            .control-label .cn { 
-                font-size: 9px; 
-            }
-            
-            /* 下拉框解除死板固定宽度，改为弹性自适应 */
-            select { 
-                width: 100%; 
-                flex: 1; 
-                max-width: 125px; 
-                font-size: 10px; 
-                padding: 4px; 
-            }
-            
-            .slider-value { 
-                min-width: 36px; 
-                font-size: 10px; 
-                padding: 2px 4px; 
-            }
-            
-            /* 滑块控件缩放 */
-            input[type="range"] { height: 24px; }
-            input[type="range"]::-webkit-slider-thumb {
-                width: 22px; height: 22px; margin-top: -9px;
-            }
-            
-            /* 开关控件缩放 */
-            .switch { width: 44px; height: 22px; }
-            .slider-switch:before { height: 16px; width: 16px; transform: translateX(2px); }
-            .switch input:checked + .slider-switch:before { transform: translateX(24px); }
-            
-            /* 按钮和颜色选择器缩放 */
-            .action-btn { font-size: 11px; padding: 6px; min-height: 28px; }
-            .color-picker { width: 40px; min-height: 28px; padding: 0; }
-            
-            /* 颜色组对齐 */
-            .color-group { gap: 4px; justify-content: space-between; }
-            .color-group span { min-width: 20px; font-size: 9px; }
+            .panel { padding: 12px !important; }
+            .control-row { font-size: 10px !important; margin-top: 10px !important; }
+            .control-label { font-size: 10px !important; }
+            .control-label .cn { font-size: 9px !important; }
+            .step-val { width: 40px !important; }
         }
 
         #sidebar.active { transform: translateX(0); }
 
         .panel {
-            border: 1px solid var(--main);
-            padding: 16px 14px 14px;
+            border: 1px solid #333;
+            padding: 18px 14px 14px;
             position: relative;
-            background: rgba(10, 10, 10, 0.6);
-            box-shadow: 0 0 8px var(--ui-glow);
+            background: transparent;
         }
 
         .panel-title {
             position: absolute;
             top: -10px; left: 14px;
-            background: var(--bg);
-            padding: 0 8px;
-            font-size: 13px;
+            background: #050505;
+            padding: 0 6px;
+            font-size: 12px;
             font-weight: bold;
-            letter-spacing: 1.5px;
-            color: var(--main);
-            text-shadow: 0 0 6px var(--main);
-            border-left: 2px solid var(--main);
+            letter-spacing: 1px;
+            color: #fff; /* 改为白色主标题 */
+            border-left: 3px solid #fff;
         }
 
         .control-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 14px;
-            font-size: 12px;
-            gap: 12px;
+            margin-top: 12px;
+            font-size: 11px;
+            gap: 8px;
+            min-height: 24px;
         }
 
         .control-row.block { 
@@ -258,186 +204,156 @@
             gap: 10px; 
         }
 
+        /* 标签排版重构：EN / 中文 */
         .control-label {
             letter-spacing: 0.5px;
             display: flex;
-            flex-direction: column;
-            line-height: 1.4;
-            min-width: 110px;
-            color: var(--main);
+            align-items: center;
+            color: #bbb;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .control-label .cn { 
             font-size: 10px; 
-            color: var(--main);
-            opacity: 0.7;
-            margin-top: 2px;
+            color: #777;
             text-transform: none;
+            margin-left: 6px;
         }
 
-        .slider-container {
+        /* --- Stepper 步进器样式 (替代原Slider) --- */
+        .stepper-container {
             display: flex;
             align-items: center;
-            gap: 8px;
-            flex: 1;
+            gap: 4px;
+            touch-action: manipulation;
         }
-        
-        /* 扩大滑块和轨道点击热区，并避免与页面滚动冲突 */
-        input[type="range"] {
-            flex: 1;
-            height: 28px; 
+        .step-btn {
+            width: 24px;
+            height: 24px;
             background: transparent;
-            -webkit-appearance: none;
-            appearance: none;
-            touch-action: none; 
-            width: 100%;
-        }
-        input[type="range"]::-webkit-slider-runnable-track {
-            height: 6px;
-            background: #151515;
-            border: 1px solid var(--main);
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 28px;
-            height: 28px;
-            background: var(--main);
-            border: 1.5px solid var(--main);
-            border-radius: 0;
+            border: 1px solid #444;
+            color: #aaa;
             cursor: pointer;
-            box-shadow: 0 0 10px var(--main);
-            margin-top: -12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            padding: 0;
+            font-family: inherit;
         }
-        .slider-value {
-            min-width: 52px;
-            text-align: right;
-            color: var(--accent);
+        .step-btn:hover, .step-btn:active {
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
+        .step-val {
+            width: 50px;
+            height: 24px;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 6px;
+            color: var(--yellow);
+            font-size: 11px;
             font-weight: bold;
-            background: #0a0a0a;
-            padding: 4px 8px;
-            border: 1px solid var(--main);
-            font-size: 12px;
-            letter-spacing: 0.5px;
+            background: #000;
         }
 
-        .switch-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            touch-action: manipulation;
-        }
-        /* 扩大 Switch 热区 */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 56px;
-            height: 28px;
-            border: 1.5px solid var(--main);
-            background: transparent;
-            box-sizing: content-box;
+        /* --- Toggle 状态开关按钮 (替代原拨动开关) --- */
+        .toggle-btn {
+            width: 70px;
+            height: 24px;
+            border: 1px solid #444;
+            font-size: 11px;
+            font-family: inherit;
             cursor: pointer;
-            touch-action: manipulation;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-            position: absolute;
-        }
-        .slider-switch {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(10,10,10,0.8);
+            text-align: center;
+            padding: 0;
             transition: none;
-            display: flex;
-            align-items: center;
-            padding: 2px;
-        }
-        .slider-switch:before {
-            content: "";
-            height: 22px;
-            width: 22px;
-            background-color: var(--main);
-            box-shadow: 0 0 8px var(--main);
-            transition: transform 0.15s;
-            transform: translateX(2px);
-        }
-        .switch input:checked + .slider-switch:before {
-            transform: translateX(28px);
-        }
-        .switch input:checked + .slider-switch {
-            background-color: rgba(30,30,30,0.9);
-        }
-
-        .action-btn, select, .color-picker {
-            min-height: 38px;
             touch-action: manipulation;
+        }
+        .toggle-btn.on {
+            background: var(--yellow);
+            color: #000;
+            border-color: var(--yellow);
+            font-weight: bold;
+        }
+        .toggle-btn.off {
+            background: #222;
+            color: #888;
         }
 
         .action-btn {
-            background: rgba(255, 85, 0, 0.1); 
-            border: 1px solid var(--main);
-            color: var(--main); 
+            background: transparent; 
+            border: 1px dashed #555;
+            color: #aaa; 
             padding: 8px 10px; 
             cursor: pointer;
             font-family: inherit; 
-            font-size: 14px; 
-            font-weight: bold;
+            font-size: 12px; 
             transition: none; 
             text-align: center; 
-            letter-spacing: 1.2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
+            touch-action: manipulation;
         }
-        .action-btn:hover { background: rgba(255, 85, 0, 0.15); color: var(--main); }
-        .action-btn:active { transform: scale(0.98); }
+        .action-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+        .action-btn:active { background: #222; }
 
+        /* 下拉框硬核化 */
         select {
-            background: #0a0a0a; 
-            color: var(--accent); 
-            border: 1px solid var(--main);
+            background: #050505; 
+            color: var(--yellow); 
+            border: 1px solid #444;
             font-family: inherit; 
-            font-size: 13px; 
-            padding: 6px 8px;
+            font-size: 11px; 
+            font-weight: bold;
+            padding: 0 6px;
+            height: 24px;
             outline: none; 
             cursor: pointer; 
-            width: 170px; 
+            flex: 1;
+            max-width: 130px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         select option {
-            background: #0a0a0a;
-            color: var(--main);
+            background: #111;
+            color: #fff;
         }
 
+        /* 色彩选择器硬核化：极简方块 */
         .color-picker {
-            width: 54px; 
-            border: 1px solid var(--main);
+            width: 24px; 
+            height: 24px;
+            border: 1px solid #444;
             background: transparent; 
             cursor: pointer; 
             padding: 0;
+            touch-action: manipulation;
         }
+        /* 针对不同浏览器的色块去边距处理 */
+        .color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-picker::-webkit-color-swatch { border: none; }
+        .color-picker::-moz-color-swatch { border: none; }
 
         .color-group {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
             flex-wrap: wrap;
             margin-top: 6px;
         }
         .color-group span {
-            font-size: 11px;
-            color: var(--main);
-            opacity: 0.8;
-            min-width: 30px;
+            font-size: 10px;
+            color: #777;
             text-transform: uppercase;
         }
 
+        /* 虚线分割线 */
         .divider {
-            height: 1px;
-            background: var(--main);
-            opacity: 0.3;
-            margin: 8px 0 2px;
+            height: 0;
+            border-bottom: 1px dashed #333;
+            margin: 12px 0 2px;
         }
 
         #scanlines {
@@ -448,10 +364,10 @@
             pointer-events: none; z-index: 5;
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: var(--main); border-radius: 0; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #444; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
     </style>
 </head>
 <body>
@@ -475,46 +391,50 @@
     
     <div id="sidebar">
         <div class="panel">
-            <div class="panel-title">TERRAIN 地形参数</div>
+            <div class="panel-title">TERRAIN / 地形</div>
             <div class="control-row">
-                <div class="control-label">RADIUS<span class="cn">星球半径</span></div>
+                <div class="control-label">RADIUS<span class="cn">/ 星球半径</span></div>
                 <div id="ctrl-rad" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">RESOLUTION<span class="cn">网格细分</span></div>
+                <div class="control-label">GRID<span class="cn">/ 网格细分</span></div>
                 <div id="ctrl-res" class="slider-container"></div>
             </div>
             <div class="divider"></div>
             <div class="control-row">
-                <div class="control-label">NOISE SCALE<span class="cn">地貌缩放</span></div>
+                <div class="control-label">NOISE<span class="cn">/ 噪声缩放</span></div>
                 <div id="ctrl-noise" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">AMPLITUDE<span class="cn">起伏幅度</span></div>
+                <div class="control-label">AMP<span class="cn">/ 起伏振幅</span></div>
                 <div id="ctrl-amp" class="slider-container"></div>
             </div>
-            <div class="divider"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">DISPLAY / 显示</div>
             <div class="control-row">
-                <div class="control-label">LINE WIDTH<span class="cn">网格线宽</span></div>
+                <div class="control-label">WIDTH<span class="cn">/ 网格线宽</span></div>
                 <div id="ctrl-linewidth" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">BRIGHTNESS<span class="cn">地形亮度</span></div>
+                <div class="control-label">LIGHT<span class="cn">/ 基础亮度</span></div>
                 <div id="ctrl-bright" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">RENDER MODE<span class="cn">渲染模式</span></div>
+                <div class="control-label">MODE<span class="cn">/ 渲染模式</span></div>
                 <select id="ui-mode">
-                    <option value="0">WIREFRAME 网格</option>
-                    <option value="1">HEATMAP 热力</option>
+                    <option value="0">WIREFRAME / 线框</option>
+                    <option value="1">HEATMAP / 热力</option>
                 </select>
             </div>
             <div class="control-row">
-                <div class="control-label">BASE COLOR<span class="cn">网格基础色</span></div>
+                <div class="control-label">COLOR<span class="cn">/ 基础色</span></div>
                 <input type="color" id="ui-color" class="color-picker" value="#0088ff">
             </div>
+            <div class="divider"></div>
             <div class="control-row block">
-                <div class="control-label">HEAT GRADIENT<span class="cn">热力渐变色 (低/中/高)</span></div>
+                <div class="control-label" style="align-self: flex-start;">HEAT GRADIENT<span class="cn">/ 热力渐变谱</span></div>
                 <div class="color-group">
                     <span>LOW</span><input type="color" id="heat-low" class="color-picker" value="#0033cc">
                     <span>MID</span><input type="color" id="heat-mid" class="color-picker" value="#33cc33">
@@ -524,124 +444,124 @@
         </div>
 
         <div class="panel">
-            <div class="panel-title">MOTION 运动控制</div>
+            <div class="panel-title">MOTION / 运动</div>
             <div class="control-row">
-                <div class="control-label">AUTO ROTATE<span class="cn">星球自转</span></div>
+                <div class="control-label">ROTATE<span class="cn">/ 星球自转</span></div>
                 <div id="switch-auto-rotate" class="switch-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">ROT. SPEED<span class="cn">自转速度</span></div>
+                <div class="control-label">R.SPEED<span class="cn">/ 自转速度</span></div>
                 <div id="ctrl-pspeed" class="slider-container"></div>
             </div>
         </div>
 
         <div class="panel">
-            <div class="panel-title">FLEET 飞船舰队</div>
+            <div class="panel-title">INSTANCES / 实体舰队</div>
             <div class="control-row">
-                <div class="control-label">SHIP COUNT<span class="cn">飞船数量</span></div>
+                <div class="control-label">SHIP NUM<span class="cn">/ 飞船数量</span></div>
                 <div id="ctrl-scount" class="slider-container"></div>
             </div>
             <div class="control-row block">
-                <button id="btn-rand-orbits" class="action-btn">⟳ RANDOMIZE ORBITS 随机轨道</button>
+                <button id="btn-rand-orbits" class="action-btn">⟳ RANDOMIZE / 重置轨道</button>
             </div>
             <div class="divider"></div>
             <div class="control-row">
-                <div class="control-label">ORBIT SPEED<span class="cn">公转速度</span></div>
+                <div class="control-label">SPEED<span class="cn">/ 公转速度</span></div>
                 <div id="ctrl-sspeed" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">BASE ALTITUDE<span class="cn">基准高度</span></div>
+                <div class="control-label">ALTITUDE<span class="cn">/ 基准高度</span></div>
                 <div id="ctrl-hover" class="slider-container"></div>
             </div>
             <div class="divider"></div>
             <div class="control-row">
-                <div class="control-label">TRAIL<span class="cn">航迹显示</span></div>
+                <div class="control-label">TRAIL<span class="cn">/ 航迹尘埃</span></div>
                 <div id="switch-trail" class="switch-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">ORBIT RING<span class="cn">轨道环</span></div>
+                <div class="control-label">ORBITS<span class="cn">/ 轨道环线</span></div>
                 <div id="switch-orbitring" class="switch-container"></div>
             </div>
             <div class="divider"></div>
             <div class="control-row">
-                <div class="control-label">SHIP SIZE<span class="cn">尺寸</span></div>
+                <div class="control-label">SIZE<span class="cn">/ 舰体尺寸</span></div>
                 <div id="ctrl-ssize" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">SHIP COLOR<span class="cn">外壳/光效</span></div>
+                <div class="control-label">COLOR<span class="cn">/ 舰体光效</span></div>
                 <input type="color" id="ui-pcolor" class="color-picker" value="#ff2200">
             </div>
             <div class="control-row">
-                <div class="control-label">STYLE<span class="cn">材质</span></div>
+                <div class="control-label">TYPE<span class="cn">/ 舰体材质</span></div>
                 <select id="ui-sstyle">
-                    <option value="0">WIREFRAME 线框</option>
-                    <option value="1">SOLID 实体</option>
+                    <option value="0">WIRE / 框架</option>
+                    <option value="1">SOLID / 实体</option>
                 </select>
             </div>
             <div class="divider"></div>
             <div class="control-row">
-                <div class="control-label">GRAVITY LINK<span class="cn">引力虚线</span></div>
+                <div class="control-label">G.LINK<span class="cn">/ 引力虚线</span></div>
                 <div id="switch-gravity" class="switch-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">LINK COLOR<span class="cn">连线颜色</span></div>
+                <div class="control-label">L.COLOR<span class="cn">/ 连线色彩</span></div>
                 <input type="color" id="ui-gravity-color" class="color-picker" value="#ffaa00">
             </div>
             <div class="control-row">
-                <div class="control-label">LINK BRIGHT<span class="cn">连线亮度</span></div>
+                <div class="control-label">L.BRIGHT<span class="cn">/ 连线发光</span></div>
                 <div id="ctrl-gravity-bright" class="slider-container"></div>
             </div>
         </div>
 
         <div class="panel">
-            <div class="panel-title">METEOR 陨石系统</div>
+            <div class="panel-title">RADAR / 陨石雷达</div>
             <div class="control-row">
-                <div class="control-label">ENABLE<span class="cn">启用陨石</span></div>
+                <div class="control-label">ENABLE<span class="cn">/ 启用预警</span></div>
                 <div id="switch-meteor" class="switch-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">COLOR<span class="cn">轮廓线颜色</span></div>
+                <div class="control-label">COLOR<span class="cn">/ 陨石色彩</span></div>
                 <input type="color" id="meteor-color" class="color-picker" value="#ccaa88">
             </div>
             <div class="control-row">
-                <div class="control-label">DISPLAY MODE<span class="cn">显示模式</span></div>
+                <div class="control-label">STYLE<span class="cn">/ 显示样式</span></div>
                 <select id="ui-meteor-mode">
-                    <option value="0">EDGES 边线</option>
-                    <option value="1">SILHOUETTE 剪影</option>
-                    <option value="2">SOLID 实体色块</option>
+                    <option value="0">EDGES / 边线</option>
+                    <option value="1">SILHOUT / 剪影</option>
+                    <option value="2">SOLID / 色块</option>
                 </select>
             </div>
             <div class="control-row">
-                <div class="control-label">LOCK STYLE<span class="cn">锁定框样式</span></div>
+                <div class="control-label">HUD<span class="cn">/ 锁定框预设</span></div>
                 <select id="ui-lock-style">
-                    <option value="0">CORNERS 边角框</option>
-                    <option value="1">CROSSHAIR 准星</option>
-                    <option value="2">RING 脉冲环</option>
+                    <option value="0">CORNERS / 边角框</option>
+                    <option value="1">CROSS / 准星十字</option>
+                    <option value="2">RING / 脉冲环</option>
                 </select>
             </div>
             <div class="control-row">
-                <div class="control-label">LOCK TIME<span class="cn">锁定爆炸时长</span></div>
+                <div class="control-label">TIME<span class="cn">/ 锁定引爆时限</span></div>
                 <div id="ctrl-lock-dur" class="slider-container"></div>
             </div>
             <div class="divider"></div>
             <div class="control-row">
-                <div class="control-label">SPEED<span class="cn">飞行速度</span></div>
+                <div class="control-label">SPEED<span class="cn">/ 飞行速度</span></div>
                 <div id="ctrl-meteor-speed" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">DENSITY<span class="cn">生成密度</span></div>
+                <div class="control-label">DENSITY<span class="cn">/ 生成密度</span></div>
                 <div id="ctrl-meteor-density" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">SIZE BASE<span class="cn">基础大小</span></div>
+                <div class="control-label">SIZE<span class="cn">/ 基础大小</span></div>
                 <div id="ctrl-meteor-size" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">LOCK DIST.<span class="cn">锁定距离</span></div>
+                <div class="control-label">DIST.<span class="cn">/ 锁定距离</span></div>
                 <div id="ctrl-lock-dist" class="slider-container"></div>
             </div>
             <div class="control-row">
-                <div class="control-label">LOCK INDICATOR<span class="cn">锁定连线</span></div>
+                <div class="control-label">LINE<span class="cn">/ 锁定连线</span></div>
                 <div id="switch-lock-line" class="switch-container"></div>
             </div>
         </div>
@@ -750,7 +670,7 @@
         let lockExplosions = [];      
         let isDragging = false;
         let dragDistance = 0; 
-        let interactionStartTime = 0; // 新增交互时间戳
+        let interactionStartTime = 0; 
         let previousMousePosition = { x: 0, y: 0 };
         let autoRotAxis = new THREE.Vector3(1, 1, 0).normalize();
         let timeGlobal = 0;
@@ -970,25 +890,68 @@
             lockExplosions.push({ group, rings, size, progress: 0, duration: 0.8, color });
         }
 
+        // --- 核心修改区：将滑动条改为硬核步进器 [-] [10] [+] ---
         function createSliderControl(containerId, value, min, max, step, onChange) {
             const container = document.getElementById(containerId);
-            container.innerHTML = `<input type="range" min="${min}" max="${max}" step="${step}" value="${value}"><span class="slider-value">${value.toFixed(step < 1 ? 2 : 0)}</span>`;
-            const range = container.querySelector('input');
-            const span = container.querySelector('.slider-value');
-            range.addEventListener('input', () => {
-                const val = parseFloat(range.value);
-                span.textContent = val.toFixed(step < 1 ? 2 : 0);
-                onChange(val);
-            });
-            return { range, span };
+            container.className = 'stepper-container';
+            container.innerHTML = `
+                <button class="step-btn minus">-</button>
+                <div class="step-val">${value.toFixed(step < 1 ? 2 : 0)}</div>
+                <button class="step-btn plus">+</button>
+            `;
+            
+            const btnM = container.querySelector('.minus');
+            const btnP = container.querySelector('.plus');
+            const valDisp = container.querySelector('.step-val');
+            let current = value;
+            let timer = null;
+
+            const updateVal = (delta) => {
+                current = Math.max(min, Math.min(max, current + delta));
+                valDisp.textContent = current.toFixed(step < 1 ? 2 : 0);
+                onChange(current);
+            };
+
+            const start = (delta) => {
+                updateVal(delta);
+                // 长按连击支持
+                timer = setInterval(() => updateVal(delta), 120);
+            };
+            const stop = () => { if(timer) clearInterval(timer); };
+
+            btnM.addEventListener('mousedown', () => start(-step));
+            btnP.addEventListener('mousedown', () => start(step));
+            btnM.addEventListener('touchstart', (e) => { e.preventDefault(); start(-step); }, {passive:false});
+            btnP.addEventListener('touchstart', (e) => { e.preventDefault(); start(step); }, {passive:false});
+            
+            window.addEventListener('mouseup', stop);
+            window.addEventListener('touchend', stop);
+
+            return { setValue: (v) => { current = v; valDisp.textContent = v.toFixed(step < 1 ? 2 : 0); } };
         }
 
+        // --- 核心修改区：将滑动开关改为硬核状态按钮 [ ON / 开 ] ---
         function createSwitch(containerId, initialState, onChange) {
             const container = document.getElementById(containerId);
-            container.innerHTML = `<label class="switch"><input type="checkbox" ${initialState ? 'checked' : ''}><span class="slider-switch"></span></label>`;
-            const checkbox = container.querySelector('input');
-            checkbox.addEventListener('change', () => onChange(checkbox.checked));
-            return { checkbox, setState: (val) => { checkbox.checked = val; } };
+            let state = initialState;
+            container.innerHTML = `<button class="toggle-btn ${state ? 'on' : 'off'}">${state ? 'ON / 开' : 'OFF / 关'}</button>`;
+            const btn = container.querySelector('button');
+            
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                state = !state;
+                btn.className = `toggle-btn ${state ? 'on' : 'off'}`;
+                btn.textContent = state ? 'ON / 开' : 'OFF / 关';
+                onChange(state);
+            });
+            
+            return { 
+                setState: (val) => { 
+                    state = val; 
+                    btn.className = `toggle-btn ${state ? 'on' : 'off'}`; 
+                    btn.textContent = state ? 'ON / 开' : 'OFF / 关'; 
+                } 
+            };
         }
 
         function updateMaterialUniforms() {
@@ -1126,7 +1089,6 @@
         function init3D() {
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
-            // 直接绑定 window.innerWidth / innerHeight，确保彻底居中且尺寸正确
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(0, 2.5, 10.5);
             camera.lookAt(0, 0, 0);
@@ -1234,12 +1196,12 @@
             const onDown = (e) => {
                 if (e.touches) { 
                     isTouchActive = true; 
-                    e.preventDefault(); // 只在画布上防止默认行为，侧边栏UI不受影响
+                    e.preventDefault(); 
                 } else if (isTouchActive) return;
                 
                 isDragging = true;
                 dragDistance = 0;
-                interactionStartTime = Date.now(); // 记录按下时间戳用于判断长短按
+                interactionStartTime = Date.now(); 
                 
                 const p = e.touches ? e.touches[0] : e;
                 previousMousePosition = { x: p.clientX, y: p.clientY };
@@ -1253,8 +1215,6 @@
                 
                 const duration = Date.now() - interactionStartTime;
                 
-                // 判断：拖动距离很小，并且按下时间小于300ms，判定为“单击”，呼出/呼出侧边栏
-                // 若时间较长则判定为“长按”，直接释放，不执行菜单呼出
                 if (dragDistance < 5 && duration < 300) {
                     sidebar.classList.toggle('active');
                 }
@@ -1284,7 +1244,6 @@
         }
 
         function onWindowResize() {
-            // 绑定真正的窗口大小，规避 DOM 容器挤压，确保绝对居中
             camera.aspect = window.innerWidth / window.innerHeight; 
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
